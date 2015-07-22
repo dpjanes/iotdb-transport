@@ -1,5 +1,5 @@
 /*
- *  index.js
+ *  connect.js
  *
  *  David Janes
  *  IOTDB.org
@@ -22,5 +22,23 @@
 
 "use strict";
 
-exports.connect = require('./connect').connect;
+var connect_rest = function(uri) {
+};
 
+var connect_mqtt = function(uri) {
+};
+
+var connect_pubnub = function(uri) {
+};
+
+var connect_pubnub = function(uri) {
+};
+
+var connect = function(uri) {
+};
+
+/**
+/**
+ *  API
+ */
+exports.connect = connect;

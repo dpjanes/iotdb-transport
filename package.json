@@ -1,10 +1,10 @@
 {
     "author": "David P. Janes <davidjanes@iotdb.org> (https://iotdb.org)", 
     "bugs": {
-        "url": "https://github.com/dpjanes/iotdb-transporter/issues"
+        "url": "https://github.com/dpjanes/iotdb-transport/issues"
     }, 
     "dependencies": {}, 
-    "description": "IOTDB Transporter - move IoT data around",
+    "description": "IOTDB Transport - move IoT data around",
     "devDependencies": {
         "grunt": "~0.4.5", 
         "grunt-contrib-jshint": "~0.10.0", 
@@ -20,14 +20,14 @@
     "homestar": {}, 
     "license": "Apache-2.0", 
     "main": "index.js", 
-    "name": "iotdb-transporter", 
+    "name": "iotdb-transport", 
     "peerDependencies": {
         "iotdb": ">=0.6.3"
     }, 
     "private": false, 
     "repository": {
         "type": "git", 
-        "url": "https://github.com/dpjanes/iotdb-transporter"
+        "url": "https://github.com/dpjanes/iotdb-transport"
     }, 
     "scripts": {
         "test": "grunt"

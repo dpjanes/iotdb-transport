@@ -7,7 +7,7 @@
 #
 
 exit 0
-PACKAGE=iotdb-transporter
+PACKAGE=iotdb-transport
 DIST_ROOT=/var/tmp/.dist.$$
 
 if [ ! -d "$DIST_ROOT" ]
