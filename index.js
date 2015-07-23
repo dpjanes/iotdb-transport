@@ -3,7 +3,7 @@
  *
  *  David Janes
  *  IOTDB.org
- *  2015-07-21
+ *  2015-07-22
  *
  *  Copyright [2013-2015] [David P. Janes]
  *
@@ -24,3 +24,8 @@
 
 exports.connect = require('./connect').connect;
 
+var transport = require('./transporter');
+exports.Transport = transport.Transport;
+exports.bind = transport.bind;
+exports.unchannel = transport.unchannel;
+exports.channel = transport.channel;

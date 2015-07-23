@@ -3,7 +3,7 @@
  *
  *  David Janes
  *  IOTDB.org
- *  2015-07-21
+ *  2015-07-22
  *
  *  Copyright [2013-2015] [David P. Janes]
  *
@@ -22,22 +22,71 @@
 
 "use strict";
 
-var connect_rest = function(uri) {
+var url = require('url');
+var fs = require('fs');
+
+var connect_fs = function(uri, paramd, callback) {
+    try {
+        var transport = require('iotdb-transport-fs');
+    } catch (x) {
+        return callback(new Error("fs: do $ homestar install iotdb-transport-fs"));
+    }
+
+    var urip = url.parse(uri);
+    fs.stat(urip.path, function(error, stats) {
+        if (error) {
+            return callback(new Error("fs: " + _.error.message(error)));
+        }
+
+        if (!stats.isDirectory()) {
+            return callback(new Error("fs: not a directory"));
+        }
+
+        var transporter = new transport.Transport({
+            prefix: urip.path,
+        });
+
+        return callback(null, {
+            store: "things",
+            module: "iotdb-transport-fs",
+            transport: transporter,
+        });
+    });
+
 };
 
-var connect_mqtt = function(uri) {
+var connect_rest = function(uri, paramd, callback) {
+    return callback(new Error("rest: not implemented"));
 };
 
-var connect_pubnub = function(uri) {
+var connect_mqtt = function(uri, paramd, callback) {
+    return callback(new Error("mqtt: not implemented"));
 };
 
-var connect_pubnub = function(uri) {
+var connect_firebase = function(uri, paramd, callback) {
+    return callback(new Error("firebase: not implemented"));
 };
 
-var connect = function(uri) {
+var connect = function(uri, paramd, callback) {
+    if (callback === undefined) {
+        callback = paramd;
+        paramd = {};
+    }
+
+    var urip = url.parse(uri);
+    if (!urip.scheme || (urip.scheme === "file")) {
+        return connect_fs(uri, paramd, callback);
+    } else if (urip.scheme === "http") {
+        return connect_rest(uri, paramd, callback);
+    } else if (urip.scheme === "mqtt") {
+        return connect_mqtt(uri, paramd, callback);
+    } else if (urip.scheme === "firebase") {
+        return connect_firebase(uri, paramd, callback);
+    } else {
+        return callback(new Error("cannot find a Transporter for this URL: " + uri));
+    }
 };
 
-/**
 /**
  *  API
  */

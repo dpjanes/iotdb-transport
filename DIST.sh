@@ -3,10 +3,9 @@
 #
 #   David Janes
 #   IOTDB
-#   2015-07-21
+#   2015-07-22
 #
 
-exit 0
 PACKAGE=iotdb-transport
 DIST_ROOT=/var/tmp/.dist.$$
 
@@ -34,8 +33,8 @@ echo "=================="
         --exclude "node_modules" \
         README.md LICENSE \
         homestar.json package.json \
-        TemplateBridge.js index.js \
-        models/*js \
+        index.js connect.js \
+        bin/transport.js \
         |
     ( cd "${NPM_DST}" && tar xvf - )
 
