@@ -24,6 +24,7 @@
 
 var url = require('url');
 var fs = require('fs');
+var iotdb = require('iotdb');
 
 var connect_fs = function(uri, paramd, callback) {
     try {
@@ -47,7 +48,7 @@ var connect_fs = function(uri, paramd, callback) {
         });
 
         return callback(null, {
-            store: "things",
+            store: paramd.store || "things",
             module: "iotdb-transport-fs",
             transport: transporter,
         });
@@ -56,7 +57,20 @@ var connect_fs = function(uri, paramd, callback) {
 };
 
 var connect_rest = function(uri, paramd, callback) {
-    return callback(new Error("rest: not implemented"));
+    try {
+        var transport = require('iotdb-transport-rest');
+    } catch (x) {
+        return callback(new Error("fs: do $ homestar install iotdb-transport-rest"));
+    }
+
+    var things = iotdb.connect();
+    var transporter = new transport.Transport(paramd, things);
+
+    return callback(null, {
+        store: paramd.store || "things",
+        module: "iotdb-transport-rest",
+        transport: transporter,
+    });
 };
 
 var connect_mqtt = function(uri, paramd, callback) {
@@ -64,7 +78,58 @@ var connect_mqtt = function(uri, paramd, callback) {
 };
 
 var connect_firebase = function(uri, paramd, callback) {
-    return callback(new Error("firebase: not implemented"));
+    try {
+        var transport = require('iotdb-transport-firebase');
+    } catch (x) {
+        return callback(new Error("fs: do $ homestar install iotdb-transport-firebase"));
+    }
+
+    var transporter = new transport.Transport(paramd);
+
+    return callback(null, {
+        store: paramd.store || "things",
+        module: "iotdb-transport-firebase",
+        transport: transporter,
+    });
+};
+
+var connect_iotdb = function(uri, paramd, callback) {
+    try {
+        var transport = require('iotdb-transport-iotdb');
+    } catch (x) {
+        return callback(new Error("fs: do $ homestar install iotdb-transport-iotdb"));
+    }
+
+    var things = iotdb.connect();
+    var transporter = new transport.Transport(paramd, things);
+
+    return callback(null, {
+        store: paramd.store || "things",
+        module: "iotdb-transport-fs",
+        transport: transporter,
+    });
+};
+
+var connect_recipes = function(uri, paramd, callback) {
+    try {
+        var iotdb_recipes = require('iotdb-recipes');
+    } catch (x) {
+        return callback(new Error("fs: do $ homestar install iotdb-recipes"));
+    }
+
+    var urip = url.parse(uri);
+
+    iotdb_recipes.recipe.load_recipes({
+        cookbooks_path: urip.path || "cookbooks",
+    });
+
+    var transporter = new iotdb_recipes.Transport(paramd);
+
+    return callback(null, {
+        store: paramd.store || "recipes",
+        module: "iotdb-transport-recipes",
+        transport: transporter,
+    });
 };
 
 var connect = function(uri, paramd, callback) {
@@ -74,14 +139,18 @@ var connect = function(uri, paramd, callback) {
     }
 
     var urip = url.parse(uri);
-    if (!urip.scheme || (urip.scheme === "file")) {
+    if (!urip.protocol || (urip.protocol === "file:")) {
         return connect_fs(uri, paramd, callback);
-    } else if (urip.scheme === "http") {
+    } else if (urip.protocol === "http:") {
         return connect_rest(uri, paramd, callback);
-    } else if (urip.scheme === "mqtt") {
+    } else if (urip.protocol === "mqtt:") {
         return connect_mqtt(uri, paramd, callback);
-    } else if (urip.scheme === "firebase") {
+    } else if (urip.protocol === "firebase:") {
         return connect_firebase(uri, paramd, callback);
+    } else if (urip.protocol === "iotdb:") {
+        return connect_iotdb(uri, paramd, callback);
+    } else if (urip.protocol === "recipes:") {
+        return connect_recipes(uri, paramd, callback);
     } else {
         return callback(new Error("cannot find a Transporter for this URL: " + uri));
     }
