@@ -27,8 +27,7 @@ var _ = iotdb._;
 
 var path = require('path');
 
-var bunyan = require('bunyan');
-var logger = bunyan.createLogger({
+var logger = iotdb.logger({
     name: 'iotdb-transport',
     module: 'transporter',
 });
