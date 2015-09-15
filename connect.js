@@ -25,6 +25,7 @@
 var url = require('url');
 var fs = require('fs');
 var iotdb = require('iotdb');
+var _ = iotdb._;
 
 var connect_fs = function(uri, paramd, callback) {
     try {
@@ -100,12 +101,28 @@ var connect_iotdb = function(uri, paramd, callback) {
         return callback(new Error("fs: do $ homestar install iotdb-transport-iotdb"));
     }
 
-    var things = iotdb.connect();
+    var things = iotdb.things();
     var transporter = new transport.Transport(paramd, things);
 
     return callback(null, {
         store: paramd.store || "things",
-        module: "iotdb-transport-fs",
+        module: "iotdb-transport-iotdb",
+        transport: transporter,
+    });
+};
+
+var connect_null = function(uri, paramd, callback) {
+    try {
+        var transport = require('iotdb-transport-null');
+    } catch (x) {
+        return callback(new Error("fs: do $ homestar install iotdb-transport-null"));
+    }
+
+    var transporter = new transport.Transport(paramd);
+
+    return callback(null, {
+        store: paramd.store || "things",
+        module: "iotdb-transport-null",
         transport: transporter,
     });
 };
@@ -151,6 +168,8 @@ var connect = function(uri, paramd, callback) {
         return connect_iotdb(uri, paramd, callback);
     } else if (urip.protocol === "recipes:") {
         return connect_recipes(uri, paramd, callback);
+    } else if (urip.protocol === "null:") {
+        return connect_null(uri, paramd, callback);
     } else {
         return callback(new Error("cannot find a Transporter for this URL: " + uri));
     }

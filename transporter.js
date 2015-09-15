@@ -25,7 +25,7 @@
 var iotdb = require('iotdb');
 var _ = iotdb._;
 
-var path = require('path');
+var join = require('url-join');
 
 var logger = iotdb.logger({
     name: 'iotdb-transport',
@@ -521,10 +521,10 @@ var channel = function (paramd, id, band) {
 
     var channel = paramd.prefix;
     if (id) {
-        channel = path.join(channel, paramd.encode(id));
+        channel = join(channel, paramd.encode(id));
 
         if (band && !paramd.flat_band) {
-            channel = path.join(channel, paramd.encode(band));
+            channel = join(channel, paramd.encode(band));
         }
     }
 
