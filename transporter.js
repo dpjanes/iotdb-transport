@@ -32,6 +32,8 @@ var logger = iotdb.logger({
     module: 'transporter',
 });
 
+var bind;
+
 /* --- callbacks --- */
 /**
  *  @param {dictionary} d
@@ -79,6 +81,40 @@ var Transport = function (initd) {
 };
 
 Transport.prototype._isTransport = true;
+
+/* --- pub/sub methods -- */
+/**
+ *  Publish changes, but don't pull any
+ */
+Transport.prototype.publish = function (secondary, paramd) {
+    var self = this;
+
+    paramd = _.defaults(paramd, {
+        updated: false,
+    });
+
+    return bind(self, secondary, paramd);
+};
+
+/**
+ *  Pull changes
+ */
+Transport.prototype.subscribe = function (secondary, paramd) {
+    throw new Error("no implemented (yet)");
+};
+
+/**
+ *  Bind
+ */
+Transport.prototype.bind = function (secondary, paramd) {
+    var self = this;
+
+    paramd = _.defaults(paramd, {
+        updated: false,
+    });
+
+    return bind(self, secondary, paramd);
+};
 
 /* --- methods --- */
 /**
@@ -354,7 +390,7 @@ Transport.prototype._validate_remove = function (paramd, callback) {
  *  secondary_transport.
  *  By default <code>true</code>.
  */
-var bind = function (primary_transport, secondary_transport, paramd) {
+bind = function (primary_transport, secondary_transport, paramd) {
     var bi;
     var band;
 
@@ -402,9 +438,9 @@ var bind = function (primary_transport, secondary_transport, paramd) {
             if (paramd.update.indexOf(ud.band) === -1) {
                 return;
             }
-            
+
             secondary_transport.update(ud, callback);
-        })
+        });
     }
 
     // updates to the dst update the src - note no user!
@@ -415,7 +451,7 @@ var bind = function (primary_transport, secondary_transport, paramd) {
             }
 
             primary_transport.update(ud, callback);
-        })
+        });
     }
 
     // …
@@ -441,7 +477,7 @@ var bind = function (primary_transport, secondary_transport, paramd) {
     if (_go(paramd.about)) {
         secondary_transport.about = function () {
             primary_transport.about.apply(primary_transport, Array.prototype.slice.call(arguments));
-        }
+        };
     }
 
     // …
@@ -458,14 +494,14 @@ var bind = function (primary_transport, secondary_transport, paramd) {
             });
 
             // primary_transport.list.apply(primary_transport, Array.prototype.slice.call(arguments));
-        }
+        };
     }
 
     // …
     if (_go(paramd.added)) {
         secondary_transport.added = function () {
             primary_transport.list.added(primary_transport, Array.prototype.slice.call(arguments));
-        }
+        };
     }
 
     // copy
@@ -515,7 +551,7 @@ var channel = function (paramd, id, band) {
     paramd = _.defaults(paramd, {
         prefix: "",
         encode: function (s) {
-            return s
+            return s;
         },
     });
 
@@ -544,7 +580,7 @@ var unchannel = function (paramd, path) {
     paramd = _.defaults(paramd, {
         prefix: "",
         decode: function (s) {
-            return s
+            return s;
         },
         dot_id: false,
         dot_band: false,
@@ -558,8 +594,9 @@ var unchannel = function (paramd, path) {
     var parts = subpath.split("/");
     parts = _.map(parts, paramd.decode);
 
+    var id;
     if (parts.length === 1) {
-        var id = parts[0];
+        id = parts[0];
         if (!paramd.dot_id && id.match(/^[.]/)) {
             return;
         }
@@ -570,7 +607,7 @@ var unchannel = function (paramd, path) {
             return [id, ".", ];
         }
     } else if (parts.length === 2) {
-        var id = parts[0];
+        id = parts[0];
         if (!paramd.dot_id && id.match(/^[.]/)) {
             return;
         }

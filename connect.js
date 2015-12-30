@@ -27,15 +27,16 @@ var fs = require('fs');
 var iotdb = require('iotdb');
 var _ = iotdb._;
 
-var connect_fs = function(uri, paramd, callback) {
+var connect_fs = function (uri, paramd, callback) {
+    var transport;
     try {
-        var transport = require('iotdb-transport-fs');
+        transport = require('iotdb-transport-fs');
     } catch (x) {
         return callback(new Error("fs: do $ homestar install iotdb-transport-fs"));
     }
 
     var urip = url.parse(uri);
-    fs.stat(urip.path, function(error, stats) {
+    fs.stat(urip.path, function (error, stats) {
         if (error) {
             return callback(new Error("fs: " + _.error.message(error)));
         }
@@ -57,9 +58,10 @@ var connect_fs = function(uri, paramd, callback) {
 
 };
 
-var connect_rest = function(uri, paramd, callback) {
+var connect_rest = function (uri, paramd, callback) {
+    var transport;
     try {
-        var transport = require('iotdb-transport-rest');
+        transport = require('iotdb-transport-rest');
     } catch (x) {
         return callback(new Error("fs: do $ homestar install iotdb-transport-rest"));
     }
@@ -74,13 +76,14 @@ var connect_rest = function(uri, paramd, callback) {
     });
 };
 
-var connect_mqtt = function(uri, paramd, callback) {
+var connect_mqtt = function (uri, paramd, callback) {
     return callback(new Error("mqtt: not implemented"));
 };
 
-var connect_firebase = function(uri, paramd, callback) {
+var connect_firebase = function (uri, paramd, callback) {
+    var transport;
     try {
-        var transport = require('iotdb-transport-firebase');
+        transport = require('iotdb-transport-firebase');
     } catch (x) {
         return callback(new Error("fs: do $ homestar install iotdb-transport-firebase"));
     }
@@ -94,9 +97,10 @@ var connect_firebase = function(uri, paramd, callback) {
     });
 };
 
-var connect_iotdb = function(uri, paramd, callback) {
+var connect_iotdb = function (uri, paramd, callback) {
+    var transport;
     try {
-        var transport = require('iotdb-transport-iotdb');
+        transport = require('iotdb-transport-iotdb');
     } catch (x) {
         return callback(new Error("fs: do $ homestar install iotdb-transport-iotdb"));
     }
@@ -111,9 +115,10 @@ var connect_iotdb = function(uri, paramd, callback) {
     });
 };
 
-var connect_null = function(uri, paramd, callback) {
+var connect_null = function (uri, paramd, callback) {
+    var transport;
     try {
-        var transport = require('iotdb-transport-null');
+        transport = require('iotdb-transport-null');
     } catch (x) {
         return callback(new Error("fs: do $ homestar install iotdb-transport-null"));
     }
@@ -127,9 +132,10 @@ var connect_null = function(uri, paramd, callback) {
     });
 };
 
-var connect_recipes = function(uri, paramd, callback) {
+var connect_recipes = function (uri, paramd, callback) {
+    var iotdb_recipes;
     try {
-        var iotdb_recipes = require('iotdb-recipes');
+        iotdb_recipes = require('iotdb-recipes');
     } catch (x) {
         return callback(new Error("fs: do $ homestar install iotdb-recipes"));
     }
@@ -149,7 +155,7 @@ var connect_recipes = function(uri, paramd, callback) {
     });
 };
 
-var connect = function(uri, paramd, callback) {
+var connect = function (uri, paramd, callback) {
     if (callback === undefined) {
         callback = paramd;
         paramd = {};
