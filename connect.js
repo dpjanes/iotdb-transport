@@ -136,7 +136,7 @@ var connect_recipes = function(uri, paramd, callback) {
 
     var urip = url.parse(uri);
 
-    iotdb_recipes.recipe.load_recipes({
+    iotdb_recipes.load_recipes({
         cookbooks_path: urip.path || "cookbooks",
     });
 

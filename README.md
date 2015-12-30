@@ -1,6 +1,8 @@
 # iotdb-transport
-IOTDB Transporter - move IoT data around
+IOTDB / Home☆Star Transport base classes.
 
-## connect
+<img src="https://raw.githubusercontent.com/dpjanes/iotdb-homestar/master/docs/HomeStar.png" align="right" />
 
-## Transporter
+This is an **advanced** topic. 
+[Documentation](https://homestar.io/about/transporters).
+
