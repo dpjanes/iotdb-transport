@@ -86,7 +86,7 @@ Transport.prototype._isTransport = true;
 /**
  *  Publish changes, but don't pull any
  */
-Transport.prototype.publish = function (secondary, paramd) {
+Transport.prototype.push_to = function (secondary, paramd) {
     var self = this;
 
     paramd = _.defaults(paramd, {
@@ -99,7 +99,7 @@ Transport.prototype.publish = function (secondary, paramd) {
 /**
  *  Pull changes
  */
-Transport.prototype.subscribe = function (secondary, paramd) {
+Transport.prototype.pull_from = function (secondary, paramd) {
     throw new Error("no implemented (yet)");
 };
 
