@@ -541,10 +541,10 @@ var channel = function (paramd, id, band) {
     if (!_.is.Dictionary(paramd)) {
         throw new Error("channel: 'paramd' must be a Dictionary");
     }
-    if ((id !== undefined) && !_.is.String(id)) {
+    if (id && !_.is.String(id)) {
         throw new Error("channel: 'id' must be a String or undefined");
     }
-    if ((band !== undefined) && !_.is.String(band)) {
+    if (band && !_.is.String(band)) {
         throw new Error("channel: 'band' must be a String or undefined");
     }
 
