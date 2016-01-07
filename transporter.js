@@ -116,6 +116,93 @@ Transport.prototype.bind = function (secondary, paramd) {
     return bind(self, secondary, paramd);
 };
 
+/* --- helpers that don't need to be replicated in subclasses */
+/**
+ *  This will callback all the data on all the bands.
+ *
+ *  NOTE:
+ *  callback is _new_ style, with ( error, d ) as the arguments
+ */
+Transport.prototype.all = function (paramd, callback) {
+    var self = this;
+
+    if (arguments.length === 0) {
+        throw new Error("Transport.all: one or two arguments required");
+    } else if (arguments.length === 1) {
+        paramd  = {};
+        callback = arguments[0];
+    } 
+
+    var paramd = _.defaults(paramd, {
+        user: null,
+    });
+    var bands = _.ld.list(paramd, "bands", [ "meta", "model", "istate", "ostate" ]);
+
+    var _outer_count = 0;
+    var _outer_increment = function() {
+        _outer_count++;
+    };
+    var _outer_decrement = function() {
+        if (--_outer_count !== 0) {
+            return;
+        }
+
+        callback(null, null);
+        callback = function() {};
+    }
+    var _outer_error = function(error) {
+        _outer_count = 0;
+        callback(error, null);
+        callback = function() {};
+    };
+
+    _outer_increment();
+
+    self.list({
+        user: paramd.user,
+    }, function(ld) {
+        if (ld.end) {
+            _outer_decrement();
+        } else if (ld.error) {
+            _outer_error(ld.error);
+        } else {
+            _outer_increment();
+
+            var d = {
+                id: ld.id,
+            };
+            var _inner_count = 0;
+            var _inner_increment = function() {
+                _inner_count++;
+            };
+            var _inner_decrement = function() {
+                if (--_inner_count !== 0) {
+                    return;
+                }
+
+                callback(null, d);
+                _outer_decrement();
+            }
+
+            _inner_increment();
+            bands.map(function(band) {
+                _inner_increment();
+                self.get({
+                    id: ld.id,
+                    band: band,
+                    user: paramd.user,
+                }, function(gd) {
+                    if (gd.value) {
+                        d[band] = gd.value;
+                    }
+                    _inner_decrement();
+                });
+            });
+            _inner_decrement();
+        }
+    });
+};
+
 /* --- methods --- */
 /**
  *  List all the IDs associated with this Transport.
