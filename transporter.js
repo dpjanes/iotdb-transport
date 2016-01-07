@@ -158,9 +158,7 @@ Transport.prototype.all = function (paramd, callback) {
 
     _outer_increment();
 
-    self.list({
-        user: paramd.user,
-    }, function(ld) {
+    var _fetch_id = function(ld) {
         if (ld.end) {
             _outer_decrement();
         } else if (ld.error) {
@@ -200,7 +198,18 @@ Transport.prototype.all = function (paramd, callback) {
             });
             _inner_decrement();
         }
-    });
+    };
+
+    if (paramd.id) {
+        _fetch_id({
+            id: paramd.id,
+            user: paramd.user,
+        });
+    } else {
+        self.list({
+            user: paramd.user,
+        }, _fetch_id);
+    }
 };
 
 /* --- methods --- */
