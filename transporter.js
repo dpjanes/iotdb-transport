@@ -180,6 +180,11 @@ Transport.prototype.all = function (paramd, callback) {
 
                 callback(null, d);
                 _outer_decrement();
+
+                // HACK
+                if (paramd.id) {
+                    _outer_decrement();
+                }
             }
 
             _inner_increment();
