@@ -217,6 +217,42 @@ Transport.prototype.all = function (paramd, callback) {
     }
 };
 
+/**
+ *  Copy from this transporter to the secondary
+ */
+Transport.prototype.copy_to = function (secondary, paramd, done) {
+    var self = this;
+    var noop = function() {};
+
+    if (arguments.length === 0) {
+        throw new Error("insufficient arguments");
+    } else if (arguments.length === 1) {
+        paramd = {};
+        done = noop;
+    } else if (arguments.length === 2) {
+        if (_.is.Function(paramd)) {
+            done = paramd;
+            paramd = {};
+        } else {
+            done = noop;
+        }
+    }
+
+    paramd = _.d.compose.shallow({}, paramd);
+
+    self.all(function(error, d) {
+        if (error) {
+            done(error, null);
+            done = noop;
+        } else if (!d) {
+            done(null, null);
+            done = noop;
+        } else {
+            secondary.update(d);
+        }
+    });
+};
+
 /* --- methods --- */
 /**
  *  List all the IDs associated with this Transport.
