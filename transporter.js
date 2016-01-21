@@ -166,9 +166,7 @@ Transport.prototype.all = function (paramd, callback) {
         } else {
             _outer_increment();
 
-            var d = {
-                id: ld.id,
-            };
+            var d = {};
             var _inner_count = 0;
             var _inner_increment = function() {
                 _inner_count++;
@@ -178,7 +176,13 @@ Transport.prototype.all = function (paramd, callback) {
                     return;
                 }
 
-                callback(null, d);
+                if (_.is.Empty(d)) {
+                    callback(new Error("not found", null));
+                } else {
+                    d.id = ld.id;
+                    callback(null, d);
+                }
+
                 _outer_decrement();
 
                 // HACK
@@ -571,23 +575,25 @@ bind = function (primary_transport, secondary_transport, paramd) {
     if (_go(paramd.update)) {
         primary_transport.updated({
             user: paramd.user
-        }, function (ud, callback) {
+        }, function (ud) {
             if (paramd.update.indexOf(ud.band) === -1) {
                 return;
             }
 
-            secondary_transport.update(ud, callback);
+            secondary_transport.update(ud, function() {
+            });
         });
     }
 
     // updates to the dst update the src - note no user!
     if (_go(paramd.updated)) {
-        secondary_transport.updated(function (ud, callback) {
+        secondary_transport.updated(function (ud) {
             if (paramd.updated.indexOf(ud.band) === -1) {
                 return;
             }
 
-            primary_transport.update(ud, callback);
+            primary_transport.update(ud, function() {
+            });
         });
     }
 
@@ -648,7 +654,8 @@ bind = function (primary_transport, secondary_transport, paramd) {
                 return;
             }
 
-            secondary_transport.update(d);
+            secondary_transport.update(d, function() {
+            });
         };
 
         var list_callback = function (d) {
