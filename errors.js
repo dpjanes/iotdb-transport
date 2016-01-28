@@ -25,18 +25,6 @@
 var assert = require('assert');
 var util = require('util');
 
-var MSG_NOT_AUTHORIZED = "not authorized";
-var MSG_NOT_FOUND = "not found";
-var MSG_NOT_RECIPE = "not a Recipe";
-var MSG_NOT_APPROPRIATE = "action not available";
-var MSG_TIMESTAMP_ERROR = "try again";
-
-var CODE_NOT_AUTHORIZED = 401;
-var CODE_NOT_FOUND = 404;
-var CODE_NOT_RECIPE = 403;
-var CODE_NOT_APPROPRIATE = 403;
-var CODE_TIMESTAMP_ERROR = 409;
-
 /**
  */
 function NotFound(message) {
@@ -69,18 +57,18 @@ function Timestamp(message) {
 util.inherits(Timestamp, Error);
 
 /**
- *  e.g. doing a PUT on a model
+ *  e.g. expecting a thing and got a recipe
  */
 function NotAppropriate(message) {
     Error.call(this);
-    this.message = message || "action not available";
+    this.message = message || "not appropriate";
     this.code = 403;
 }
 
 util.inherits(NotAppropriate, Error);
 
 /**
- *  e.g. expecting a thing and got a recipe
+ *  e.g. doing a PUT on a model
  */
 function MethodNotAllowed(message) {
     Error.call(this);
@@ -91,6 +79,28 @@ function MethodNotAllowed(message) {
 util.inherits(MethodNotAllowed, Error);
 
 /**
+ *  e.g. we're connecting to Redis and it doesn't work
+ */
+function ServiceNotAvailable(message) {
+    Error.call(this);
+    this.message = message || "underlying service not available";
+    this.code = 500;
+}
+
+util.inherits(ServiceNotAvailable, Error);
+
+/**
+ *  e.g. expecting a thing and got a recipe
+ */
+function NotImplemented(message) {
+    Error.call(this);
+    this.message = message || "not implemented";
+    this.code = 500;
+}
+
+util.inherits(NotImplemented, Error);
+
+/**
  *  API
  */
 exports.NotFound = NotFound;
@@ -98,3 +108,5 @@ exports.NotAuthorized = NotAuthorized;
 exports.Timestamp = Timestamp;
 exports.NotAppropriate = NotAppropriate;
 exports.MethodNotAllowed = MethodNotAllowed;
+exports.ServiceNotAvailable = ServiceNotAvailable;
+exports.NotImplemented = NotImplemented;

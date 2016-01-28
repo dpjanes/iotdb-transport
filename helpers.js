@@ -24,6 +24,7 @@
 
 var iotdb = require('iotdb');
 var _ = iotdb._;
+var errors = require("./errors");
 
 var join = require('url-join');
 
@@ -156,7 +157,7 @@ var bind = function (primary_transport, secondary_transport, paramd) {
                     band: gd.band,
                     user: gd.user,
                     value: null,
-                    error: new Error("No such band"),
+                    error: new errors.NotFound(),
                 });
             } else {
                 return primary_transport.get(gd, callback);
