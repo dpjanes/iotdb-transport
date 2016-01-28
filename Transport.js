@@ -1,11 +1,11 @@
 /*
- *  transporter.js
+ *  Transport.js
  *
  *  David Janes
  *  IOTDB.org
  *  2015-03-21
  *
- *  Copyright [2013-2015] [David P. Janes]
+ *  Copyright [2013-2016] [David P. Janes]
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -29,10 +29,10 @@ var join = require('url-join');
 
 var logger = iotdb.logger({
     name: 'iotdb-transport',
-    module: 'transporter',
+    module: 'Transport',
 });
 
-var bind;
+var helpers = require('./helpers');
 
 /* --- callbacks --- */
 /**
@@ -93,7 +93,7 @@ Transport.prototype.push_to = function (secondary, paramd) {
         updated: false,
     });
 
-    return bind(self, secondary, paramd);
+    return helpers.bind(self, secondary, paramd);
 };
 
 /**
@@ -113,7 +113,7 @@ Transport.prototype.bind = function (secondary, paramd) {
         updated: false,
     });
 
-    return bind(self, secondary, paramd);
+    return helpers.bind(self, secondary, paramd);
 };
 
 /* --- helpers that don't need to be replicated in subclasses */
@@ -129,36 +129,36 @@ Transport.prototype.all = function (paramd, callback) {
     if (arguments.length === 0) {
         throw new Error("Transport.all: one or two arguments required");
     } else if (arguments.length === 1) {
-        paramd  = {};
+        paramd = {};
         callback = arguments[0];
-    } 
+    }
 
-    var paramd = _.defaults(paramd, {
+    paramd = _.defaults(paramd, {
         user: null,
     });
-    var bands = _.ld.list(paramd, "bands", [ "meta", "model", "istate", "ostate" ]);
+    var bands = _.ld.list(paramd, "bands", ["meta", "model", "istate", "ostate"]);
 
     var _outer_count = 0;
-    var _outer_increment = function() {
+    var _outer_increment = function () {
         _outer_count++;
     };
-    var _outer_decrement = function() {
+    var _outer_decrement = function () {
         if (--_outer_count !== 0) {
             return;
         }
 
         callback(null, null);
-        callback = function() {};
-    }
-    var _outer_error = function(error) {
+        callback = function () {};
+    };
+    var _outer_error = function (error) {
         _outer_count = 0;
         callback(error, null);
-        callback = function() {};
+        callback = function () {};
     };
 
     _outer_increment();
 
-    var _fetch_id = function(ld) {
+    var _fetch_id = function (ld) {
         if (ld.end) {
             _outer_decrement();
         } else if (ld.error) {
@@ -168,10 +168,10 @@ Transport.prototype.all = function (paramd, callback) {
 
             var d = {};
             var _inner_count = 0;
-            var _inner_increment = function() {
+            var _inner_increment = function () {
                 _inner_count++;
             };
-            var _inner_decrement = function() {
+            var _inner_decrement = function () {
                 if (--_inner_count !== 0) {
                     return;
                 }
@@ -189,16 +189,16 @@ Transport.prototype.all = function (paramd, callback) {
                 if (paramd.id) {
                     _outer_decrement();
                 }
-            }
+            };
 
             _inner_increment();
-            bands.map(function(band) {
+            bands.map(function (band) {
                 _inner_increment();
                 self.get({
                     id: ld.id,
                     band: band,
                     user: paramd.user,
-                }, function(gd) {
+                }, function (gd) {
                     if (gd.value) {
                         d[band] = gd.value;
                     }
@@ -226,7 +226,7 @@ Transport.prototype.all = function (paramd, callback) {
  */
 Transport.prototype.copy_to = function (secondary, paramd, done) {
     var self = this;
-    var noop = function() {};
+    var noop = function () {};
 
     if (arguments.length === 0) {
         throw new Error("insufficient arguments");
@@ -244,7 +244,7 @@ Transport.prototype.copy_to = function (secondary, paramd, done) {
 
     paramd = _.d.compose.shallow({}, paramd);
 
-    self.all(function(error, d) {
+    self.all(function (error, d) {
         if (error) {
             done(error, null);
             done = noop;
@@ -482,299 +482,8 @@ Transport.prototype._validate_remove = function (paramd, callback) {
     }
 };
 
-/* --- helper functions --- */
-/**
- *  Make one Transport control another.
- *
- *  @param {Transport} master_transport
- *
- *  @param {Transport} slave_transport
- *
- *  @param {dictionary|undefined} paramd
- *  Optional parameters
- *
- *  @param {boolean} paramd.verbose
- *
- *  @param {array} paramd.bands
- *  List of bands to operate on. By default
- *  <code>"istate", "ostate", "model", "meta"</code>.
- *  All subsequent paramd.* values, except as noted:
- *  if <code>true</code> will become this value.
- *
- *  @param {boolean|array} paramd.update
- *  Whenever primary_transport is updated on these bands,
- *  update secondary_transport.
- *  By default <code>true</code>.
- *
- *  @param {boolean|array} paramd.updated
- *  Whenever secondary_transport is updated on these bands,
- *  update primary_transport.
- *  By default <code>false</code>.
- *  If you set this to true (or some bands), the secondary_transport
- *  can update the primary_transport which is
- *  awesome and scary, just like your mom.
- *
- *  @param {boolean|array} paramd.get
- *  Calls to get on secondary_transport (on the bands) will
- *  actually be calling the primary_transport
- *  By default <code>true</code>.
- *
- *  @param {boolean} paramd.list
- *  Calls to list on secondary_transport will
- *  actually be calling the primary_transport. Note
- *  that this is band independent!
- *  By default <code>true</code>.
- *
- *  @param {boolean|array} paramd.copy
- *  All Records from the primary_transport (on
- *  the bands) will be copied to the 
- *  secondary_transport.
- *  By default <code>true</code>.
- */
-bind = function (primary_transport, secondary_transport, paramd) {
-    var bi;
-    var band;
-
-    paramd = _.defaults(paramd, {
-        verbose: false,
-        bands: ["istate", "ostate", "model", "meta"],
-        user: null,
-        update: true,
-        updated: false, // N.B.
-        get: true,
-        about: true,
-        list: true,
-        added: true,
-        copy: true,
-    });
-
-    var _go = function (value) {
-        return value !== [];
-    };
-
-    var _normalize = function (key) {
-        var value = paramd[key];
-        if (value === true) {
-            paramd[key] = paramd.bands;
-        } else if (value === false) {
-            paramd[key] = [];
-        } else if (!_.is.Array(value)) {
-            throw new Error("bad value - expected Array or Boolean: key=" + key + " value=" + value);
-        }
-    };
-
-    _normalize("update");
-    _normalize("updated");
-    _normalize("get");
-    _normalize("about");
-    _normalize("list");
-    _normalize("added");
-    _normalize("copy");
-
-    // updates to the src update the dst
-    if (_go(paramd.update)) {
-        primary_transport.updated({
-            user: paramd.user
-        }, function (ud) {
-            if (paramd.update.indexOf(ud.band) === -1) {
-                return;
-            }
-
-            secondary_transport.update(ud, function() {
-            });
-        });
-    }
-
-    // updates to the dst update the src - note no user!
-    if (_go(paramd.updated)) {
-        secondary_transport.updated(function (ud) {
-            if (paramd.updated.indexOf(ud.band) === -1) {
-                return;
-            }
-
-            primary_transport.update(ud, function() {
-            });
-        });
-    }
-
-    // …
-    if (_go(paramd.get)) {
-        var _secondary_get = secondary_transport.get;
-
-        secondary_transport.get = function (gd, callback) {
-            if (paramd.get.indexOf(gd.band) === -1) {
-                callback({
-                    id: gd.id,
-                    band: gd.band,
-                    user: gd.user,
-                    value: null,
-                    error: new Error("No such band"),
-                });
-            } else {
-                return primary_transport.get(gd, callback);
-            }
-        };
-    }
-
-    // …
-    if (_go(paramd.about)) {
-        secondary_transport.about = function () {
-            primary_transport.about.apply(primary_transport, Array.prototype.slice.call(arguments));
-        };
-    }
-
-    // …
-    if (_go(paramd.list)) {
-        secondary_transport.list = function (paramd, callback) {
-            if (arguments.length === 1) {
-                callback = paramd;
-                paramd = {};
-            }
-
-            primary_transport.list(paramd, function (resultd) {
-                // console.log("X.2", paramd);
-                callback(resultd);
-            });
-
-            // primary_transport.list.apply(primary_transport, Array.prototype.slice.call(arguments));
-        };
-    }
-
-    // …
-    if (_go(paramd.added)) {
-        secondary_transport.added = function () {
-            primary_transport.list.added(primary_transport, Array.prototype.slice.call(arguments));
-        };
-    }
-
-    // copy
-    if (_go(paramd.copy)) {
-        var copy_callback = function (d) {
-            if ((d.value === undefined) || (d.value === null)) {
-                return;
-            }
-
-            secondary_transport.update(d, function() {
-            });
-        };
-
-        var list_callback = function (d) {
-            if (d.end) {
-                return;
-            }
-
-            for (bi in paramd.copy) {
-                var copy_band = paramd.copy[bi];
-
-                primary_transport.get({
-                    id: d.id,
-                    band: copy_band,
-                    user: d.user,
-                }, copy_callback);
-            }
-        };
-
-        primary_transport.added(list_callback);
-        primary_transport.list(list_callback);
-    }
-};
-
-/**
- */
-var channel = function (paramd, id, band) {
-    if (!_.is.Dictionary(paramd)) {
-        throw new Error("channel: 'paramd' must be a Dictionary");
-    }
-    if (id && !_.is.String(id)) {
-        throw new Error("channel: 'id' must be a String or undefined");
-    }
-    if (band && !_.is.String(band)) {
-        throw new Error("channel: 'band' must be a String or undefined");
-    }
-
-    paramd = _.defaults(paramd, {
-        prefix: "",
-        encode: function (s) {
-            return s;
-        },
-    });
-
-    var channel = paramd.prefix;
-    if (id) {
-        channel = join(channel, paramd.encode(id));
-
-        if (band && !paramd.flat_band) {
-            channel = join(channel, paramd.encode(band));
-        }
-    }
-
-    return channel;
-};
-
-/**
- */
-var unchannel = function (paramd, path) {
-    if (!_.is.Dictionary(paramd)) {
-        throw new Error("unchannel: 'paramd' must be a Dictionary");
-    }
-    if (!_.is.String(path)) {
-        throw new Error("unchannel: 'path' must be a String");
-    }
-
-    paramd = _.defaults(paramd, {
-        prefix: "",
-        decode: function (s) {
-            return s;
-        },
-        dot_id: false,
-        dot_band: false,
-    });
-
-    var subpath = path.substring(paramd.prefix.length);
-    subpath = subpath.replace(/^\/*/, '');
-    subpath = subpath.replace(/\/*$/, '');
-    subpath = subpath.replace(/\/+/g, '/');
-
-    var parts = subpath.split("/");
-    parts = _.map(parts, paramd.decode);
-
-    var id;
-    if (parts.length === 1) {
-        id = parts[0];
-        if (!paramd.dot_id && id.match(/^[.]/)) {
-            return;
-        }
-
-        if (paramd.flat_band) {
-            return [id, paramd.flat_band, ];
-        } else {
-            return [id, ".", ];
-        }
-    } else if (parts.length === 2) {
-        id = parts[0];
-        if (!paramd.dot_id && id.match(/^[.]/)) {
-            return;
-        }
-
-        var band = parts[1];
-        if (!paramd.dot_band, band.match(/^[.]/)) {
-            return;
-        }
-
-        if (paramd.flat_band) {
-            return [id, paramd.flat_band, ];
-        } else {
-            return [id, band, ];
-        }
-    } else {
-        return;
-    }
-};
 
 /**
  *  API
  */
 exports.Transport = Transport;
-exports.bind = bind;
-exports.unchannel = unchannel;
-exports.channel = channel;

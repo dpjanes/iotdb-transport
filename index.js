@@ -24,8 +24,12 @@
 
 exports.connect = require('./connect').connect;
 
-var transport = require('./transporter');
+var transport = require('./Transport');
 exports.Transport = transport.Transport;
-exports.bind = transport.bind;
-exports.unchannel = transport.unchannel;
-exports.channel = transport.channel;
+
+var helpers = require('./helpers');
+exports.bind = helpers.bind;
+exports.unchannel = helpers.unchannel;
+exports.channel = helpers.channel;
+
+exports.errors = require('./errors');
