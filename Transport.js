@@ -310,31 +310,31 @@ Transport.prototype._validate_added = function (paramd, callback) {
 };
 
 /**
- *  Tell about an ID (particularly: does it exists, what bands are available)
+ *  Give the bands of an ID
  *
  *  @param {string} id
  *  The ID of the Record
  *
  *  @param {Transport~about_callback} callback
  */
-Transport.prototype.about = function (paramd, callback) {
+Transport.prototype.bands = function (paramd, callback) {
     var self = this;
 
     throw new Error("Not Implemented");
 };
 
-Transport.prototype._validate_about = function (paramd, callback) {
+Transport.prototype._validate_bands = function (paramd, callback) {
     if (!_.is.Dictionary(paramd)) {
-        throw new Error("about: 'paramd' must be a Dictionary");
+        throw new Error("bands: 'paramd' must be a Dictionary");
     }
     if (!_.is.Function(callback)) {
-        throw new Error("about: 'callback' must be a Function");
+        throw new Error("bands: 'callback' must be a Function");
     }
     if (!paramd.id) {
-        throw new Error("about: 'paramd.id' is required");
+        throw new Error("bands: 'paramd.id' is required");
     }
     if (!_.is.String(paramd.id)) {
-        throw new Error("about: 'paramd.id' must be a string");
+        throw new Error("bands: 'paramd.id' must be a string");
     }
 };
 

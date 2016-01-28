@@ -93,7 +93,6 @@ var bind = function (primary_transport, secondary_transport, paramd) {
         update: true,
         updated: false, // N.B.
         get: true,
-        about: true,
         list: true,
         added: true,
         copy: true,
@@ -117,7 +116,6 @@ var bind = function (primary_transport, secondary_transport, paramd) {
     _normalize("update");
     _normalize("updated");
     _normalize("get");
-    _normalize("about");
     _normalize("list");
     _normalize("added");
     _normalize("copy");
@@ -166,14 +164,11 @@ var bind = function (primary_transport, secondary_transport, paramd) {
     }
 
     // …
-    if (_go(paramd.about)) {
-        secondary_transport.about = function () {
-            primary_transport.about.apply(primary_transport, Array.prototype.slice.call(arguments));
-        };
-    }
-
-    // …
     if (_go(paramd.list)) {
+        secondary_transport.bands = function () {
+            primary_transport.bands.apply(primary_transport, Array.prototype.slice.call(arguments));
+        };
+
         secondary_transport.list = function (paramd, callback) {
             if (arguments.length === 1) {
                 callback = paramd;
