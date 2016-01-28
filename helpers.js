@@ -131,7 +131,7 @@ var bind = function (primary_transport, secondary_transport, paramd) {
                 return;
             }
 
-            secondary_transport.update(ud, function () {});
+            secondary_transport.put(ud, _.noop);
         });
     }
 
@@ -142,7 +142,7 @@ var bind = function (primary_transport, secondary_transport, paramd) {
                 return;
             }
 
-            primary_transport.update(ud, function () {});
+            primary_transport.put(ud, _.noop);
         });
     }
 
@@ -203,7 +203,7 @@ var bind = function (primary_transport, secondary_transport, paramd) {
                 return;
             }
 
-            secondary_transport.update(d, function () {});
+            secondary_transport.put(d, _.noop);
         };
 
         var list_callback = function (d) {

@@ -396,7 +396,7 @@ Transport.prototype._validate_get = function (paramd, callback) {
  *  @param {Transport~get_callback|undefined} callback
  *  Optional callback
  */
-Transport.prototype.update = function (paramd, callback) {
+Transport.prototype.put = function (paramd, callback) {
     var self = this;
 
     throw new Error("Not Implemented");
