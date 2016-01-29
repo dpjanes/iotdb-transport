@@ -187,8 +187,11 @@ var bind = function (primary_transport, secondary_transport, paramd) {
 
     // copy
     if (_go(paramd.copy)) {
-        var copy_callback = function (d) {
-            if ((d.value === undefined) || (d.value === null)) {
+        var get_callback = function (error, d) {
+            if (error) {
+                return;
+            }
+            if (!d.value) {
                 return;
             }
 
@@ -207,7 +210,7 @@ var bind = function (primary_transport, secondary_transport, paramd) {
                     id: d.id,
                     band: copy_band,
                     user: d.user,
-                }, copy_callback);
+                }, get_callback);
             }
         };
 

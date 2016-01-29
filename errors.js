@@ -101,6 +101,28 @@ function NotImplemented(message) {
 util.inherits(NotImplemented, Error);
 
 /**
+ *  This is not implemented and never will be implemented
+ */
+function NeverImplemented(message) {
+    Error.call(this);
+    this.message = message || "never will be implemented";
+    this.code = 400;
+}
+
+util.inherits(NeverImplemented, Error);
+
+/**
+ *  Some sort of internal error
+ */
+function Internal(message) {
+    Error.call(this);
+    this.message = message || "internal error";
+    this.code = 500;
+}
+
+util.inherits(Internal, Error);
+
+/**
  *  API
  */
 exports.NotFound = NotFound;
@@ -110,3 +132,5 @@ exports.NotAppropriate = NotAppropriate;
 exports.MethodNotAllowed = MethodNotAllowed;
 exports.ServiceNotAvailable = ServiceNotAvailable;
 exports.NotImplemented = NotImplemented;
+exports.NeverImplemented = NeverImplemented;
+exports.Internal = Internal;

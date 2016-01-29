@@ -198,7 +198,7 @@ Transport.prototype.all = function (paramd, callback) {
                     id: ld.id,
                     band: band,
                     user: paramd.user,
-                }, function (gd) {
+                }, function (error, gd) {
                     if (gd.value) {
                         d[band] = gd.value;
                     }
