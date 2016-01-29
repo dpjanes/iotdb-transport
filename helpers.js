@@ -216,7 +216,13 @@ var bind = function (primary_transport, secondary_transport, paramd) {
 
         primary_transport.added({
             user: paramd.user,
-        }, list_callback);
+        }, function(error, d) {
+            if (error) {
+                return;
+            }
+
+            list_callback(d);
+        });
 
         primary_transport.list({
             user: paramd.user,
