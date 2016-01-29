@@ -124,7 +124,11 @@ var bind = function (primary_transport, secondary_transport, paramd) {
     if (_go(paramd.update)) {
         primary_transport.updated({
             user: paramd.user,
-        }, function (ud) {
+        }, function (error, ud) {
+            if (error) {
+                return;
+            }
+
             if (paramd.update.indexOf(ud.band) === -1) {
                 return;
             }
@@ -137,7 +141,10 @@ var bind = function (primary_transport, secondary_transport, paramd) {
     if (_go(paramd.updated)) {
         secondary_transport.updated({
             user: paramd.user,
-        }, function (ud) {
+        }, function (error, ud) {
+            if (error) {
+                return;
+            }
             if (paramd.updated.indexOf(ud.band) === -1) {
                 return;
             }
