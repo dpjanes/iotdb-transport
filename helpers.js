@@ -123,7 +123,7 @@ var bind = function (primary_transport, secondary_transport, paramd) {
     // updates to the src update the dst
     if (_go(paramd.update)) {
         primary_transport.updated({
-            user: paramd.user
+            user: paramd.user,
         }, function (ud) {
             if (paramd.update.indexOf(ud.band) === -1) {
                 return;
@@ -135,7 +135,9 @@ var bind = function (primary_transport, secondary_transport, paramd) {
 
     // updates to the dst update the src - note no user!
     if (_go(paramd.updated)) {
-        secondary_transport.updated(function (ud) {
+        secondary_transport.updated({
+            user: paramd.user,
+        }, function (ud) {
             if (paramd.updated.indexOf(ud.band) === -1) {
                 return;
             }
@@ -170,24 +172,16 @@ var bind = function (primary_transport, secondary_transport, paramd) {
         };
 
         secondary_transport.list = function (paramd, callback) {
-            if (arguments.length === 1) {
-                callback = paramd;
-                paramd = {};
-            }
-
             primary_transport.list(paramd, function (resultd) {
-                // console.log("X.2", paramd);
                 callback(resultd);
             });
-
-            // primary_transport.list.apply(primary_transport, Array.prototype.slice.call(arguments));
         };
     }
 
     // …
     if (_go(paramd.added)) {
         secondary_transport.added = function () {
-            primary_transport.list.added(primary_transport, Array.prototype.slice.call(arguments));
+            primary_transport.added(primary_transport, Array.prototype.slice.call(arguments));
         };
     }
 
@@ -217,8 +211,13 @@ var bind = function (primary_transport, secondary_transport, paramd) {
             }
         };
 
-        primary_transport.added(list_callback);
-        primary_transport.list(list_callback);
+        primary_transport.added({
+            user: paramd.user,
+        }, list_callback);
+
+        primary_transport.list({
+            user: paramd.user,
+        }, list_callback);
     }
 };
 
