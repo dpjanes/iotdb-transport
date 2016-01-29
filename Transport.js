@@ -158,55 +158,60 @@ Transport.prototype.all = function (paramd, callback) {
 
     _outer_increment();
 
-    var _fetch_id = function (ld) {
-        if (ld.end) {
-            _outer_decrement();
-        } else if (ld.error) {
-            _outer_error(ld.error);
-        } else {
-            _outer_increment();
-
-            var d = {};
-            var _inner_count = 0;
-            var _inner_increment = function () {
-                _inner_count++;
-            };
-            var _inner_decrement = function () {
-                if (--_inner_count !== 0) {
-                    return;
-                }
-
-                if (_.is.Empty(d)) {
-                    callback(new Error("not found", null));
-                } else {
-                    d.id = ld.id;
-                    callback(null, d);
-                }
-
-                _outer_decrement();
-
-                // HACK
-                if (paramd.id) {
-                    _outer_decrement();
-                }
-            };
-
-            _inner_increment();
-            bands.map(function (band) {
-                _inner_increment();
-                self.get({
-                    id: ld.id,
-                    band: band,
-                    user: paramd.user,
-                }, function (error, gd) {
-                    if (gd.value) {
-                        d[band] = gd.value;
-                    }
-                    _inner_decrement();
-                });
-            });
-            _inner_decrement();
+    var _fetch_id = function (error, ld) {
+        if (error) {
+            _outer_error(error);
+            return;
         }
+
+        if (!ld) {
+            _outer_decrement();
+            returnl
+            
+        }
+
+        _outer_increment();
+
+        var d = {};
+        var _inner_count = 0;
+        var _inner_increment = function () {
+            _inner_count++;
+        };
+        var _inner_decrement = function () {
+            if (--_inner_count !== 0) {
+                return;
+            }
+
+            if (_.is.Empty(d)) {
+                callback(new Error("not found", null));
+            } else {
+                d.id = ld.id;
+                callback(null, d);
+            }
+
+            _outer_decrement();
+
+            // HACK
+            if (paramd.id) {
+                _outer_decrement();
+            }
+        };
+
+        _inner_increment();
+        bands.map(function (band) {
+            _inner_increment();
+            self.get({
+                id: ld.id,
+                band: band,
+                user: paramd.user,
+            }, function (error, gd) {
+                if (gd.value) {
+                    d[band] = gd.value;
+                }
+                _inner_decrement();
+            });
+        });
+        _inner_decrement();
     };
 
     if (paramd.id) {

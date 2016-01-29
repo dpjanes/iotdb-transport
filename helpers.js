@@ -179,8 +179,8 @@ var bind = function (primary_transport, secondary_transport, paramd) {
         };
 
         secondary_transport.list = function (paramd, callback) {
-            primary_transport.list(paramd, function (resultd) {
-                callback(resultd);
+            primary_transport.list(paramd, function (error, resultd) {
+                callback(error, resultd);
             });
         };
     }
@@ -205,8 +205,11 @@ var bind = function (primary_transport, secondary_transport, paramd) {
             secondary_transport.put(d, _.noop);
         };
 
-        var list_callback = function (d) {
-            if (d.end) {
+        var list_callback = function (error, d) {
+            if (error) {
+                return;
+            }
+            if (!d) {
                 return;
             }
 
@@ -223,13 +226,7 @@ var bind = function (primary_transport, secondary_transport, paramd) {
 
         primary_transport.added({
             user: paramd.user,
-        }, function(error, d) {
-            if (error) {
-                return;
-            }
-
-            list_callback(d);
-        });
+        }, list_callback);
 
         primary_transport.list({
             user: paramd.user,
