@@ -166,8 +166,8 @@ Transport.prototype.all = function (paramd, callback) {
 
         if (!ld) {
             _outer_decrement();
-            returnl
-            
+            return;
+
         }
 
         _outer_increment();
