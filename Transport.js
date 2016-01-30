@@ -411,8 +411,8 @@ Transport.prototype._validate_update = function (paramd, callback) {
     if (!_.is.Dictionary(paramd)) {
         throw new Error("update: 'paramd' must be a Dictionary");
     }
-    if (!_.is.Function(callback) && (callback !== undefined)) {
-        throw new Error("update: 'callback' must be a Function or undefined");
+    if (!_.is.Function(callback)) {
+        throw new Error("list: 'callback' must be a Function");
     }
     if (!paramd.id) {
         throw new Error("update: 'paramd.id' is required");
@@ -479,8 +479,8 @@ Transport.prototype._validate_remove = function (paramd, callback) {
     if (!_.is.Dictionary(paramd)) {
         throw new Error("remove: 'paramd' must be a Dictionary");
     }
-    if (!_.is.Function(callback) && (callback !== undefined)) {
-        throw new Error("remove: 'callback' must be a Function or undefined");
+    if (!_.is.Function(callback)) {
+        throw new Error("list: 'callback' must be a Function");
     }
     if (!paramd.id) {
         throw new Error("remove: 'paramd.id' is required");
