@@ -33,7 +33,7 @@ echo "=================="
         --exclude "node_modules" \
         README.md LICENSE \
         homestar.json package.json \
-        index.js connect.js transporter.js \
+        index.js connect.js transporter.js Transport.js helpers.js errors.js \
         bin/transport \
         |
     ( cd "${NPM_DST}" && tar xvf - && npm publish ) || exit 1
