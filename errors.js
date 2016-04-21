@@ -50,7 +50,7 @@ util.inherits(NotAuthorized, Error);
  */
 function Timestamp(message) {
     Error.call(this);
-    this.message = message || "timestamp out of date - try again";
+    this.message = message || "timestamp out of date";
     this.code = 409;
 }
 

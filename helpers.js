@@ -88,7 +88,7 @@ var bind = function (primary_transport, secondary_transport, paramd) {
 
     paramd = _.defaults(paramd, {
         verbose: false,
-        bands: ["istate", "ostate", "model", "meta"],
+        bands: ["istate", "ostate", "model", "meta", "connection", ],
         user: null,
         update: true,
         updated: false, // N.B.

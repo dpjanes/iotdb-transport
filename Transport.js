@@ -136,7 +136,7 @@ Transport.prototype.all = function (paramd, callback) {
     paramd = _.defaults(paramd, {
         user: null,
     });
-    var bands = _.ld.list(paramd, "bands", ["meta", "model", "istate", "ostate"]);
+    var bands = _.ld.list(paramd, "bands", ["meta", "model", "istate", "ostate", "connection", ]);
 
     var _outer_count = 0;
     var _outer_increment = function () {
