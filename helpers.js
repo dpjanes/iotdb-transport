@@ -99,7 +99,7 @@ var bind = function (primary_transport, secondary_transport, paramd) {
     });
 
     var _go = function (value) {
-        return value !== [];
+        return !_.is.Empty(value);
     };
 
     var _normalize = function (key) {

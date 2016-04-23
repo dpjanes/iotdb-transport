@@ -84,7 +84,7 @@ util.inherits(MethodNotAllowed, Error);
 function ServiceNotAvailable(message) {
     Error.call(this);
     this.message = message || "underlying service not available";
-    this.code = 500;
+    this.code = 503;
 }
 
 util.inherits(ServiceNotAvailable, Error);
@@ -95,7 +95,7 @@ util.inherits(ServiceNotAvailable, Error);
 function NotImplemented(message) {
     Error.call(this);
     this.message = message || "not implemented";
-    this.code = 500;
+    this.code = 501;
 }
 
 util.inherits(NotImplemented, Error);
@@ -106,10 +106,21 @@ util.inherits(NotImplemented, Error);
 function NeverImplemented(message) {
     Error.call(this);
     this.message = message || "never will be implemented";
-    this.code = 400;
+    this.code = 501;    
 }
 
 util.inherits(NeverImplemented, Error);
+
+/**
+ *  Additional setup is required
+ */
+function SetupRequired(message) {
+    Error.call(this);
+    this.message = message || "setup required";
+    this.code = 500;
+}
+
+util.inherits(SetupRequired, Error);
 
 /**
  *  Some sort of internal error
@@ -133,4 +144,5 @@ exports.MethodNotAllowed = MethodNotAllowed;
 exports.ServiceNotAvailable = ServiceNotAvailable;
 exports.NotImplemented = NotImplemented;
 exports.NeverImplemented = NeverImplemented;
+exports.SetupRequired = SetupRequired;
 exports.Internal = Internal;
