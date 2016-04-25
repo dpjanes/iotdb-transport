@@ -31,5 +31,6 @@ var helpers = require('./helpers');
 exports.bind = helpers.bind;
 exports.unchannel = helpers.unchannel;
 exports.channel = helpers.channel;
+exports.counter = helpers.counter;
 
 exports.errors = require('./errors');

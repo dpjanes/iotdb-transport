@@ -98,6 +98,8 @@ var bind = function (primary_transport, secondary_transport, paramd) {
         copy: true,
     });
 
+    // console.log("HERE:AAA.BIND", paramd.update, paramd.what);
+
     var _go = function (value) {
         return !_.is.Empty(value);
     };
@@ -133,6 +135,7 @@ var bind = function (primary_transport, secondary_transport, paramd) {
                 return;
             }
 
+            // console.log("HERE:AAA.UPDATE", paramd.update, paramd.what);
             secondary_transport.put(ud, _.noop);
         });
     }
@@ -142,6 +145,14 @@ var bind = function (primary_transport, secondary_transport, paramd) {
         secondary_transport.updated({
             user: paramd.user,
         }, function (error, ud) {
+            if (paramd.verbose) {
+                logger.info({
+                    error: error,
+                    ud: ud,
+                    bands: paramd.updated,
+                }, "VERBOSE: updated->put");
+            }
+
             if (error) {
                 return;
             }
@@ -327,8 +338,36 @@ var unchannel = function (paramd, path) {
 };
 
 /**
+ *  Track entering and leaving a code block.
+ */
+const counter = function(done) {
+    var count = 0;
+
+    return {
+        increment: function() {
+            count++;
+        },
+
+        decrement: function() {
+            if (--count === 0) {
+                var _done = done;
+                done = _.noop;
+                _done(null);
+            }
+        },
+
+        error: function(error) {
+            var _done = done;
+            done = _.noop;
+            _done(error);
+        },
+    }
+};
+
+/**
  *  API
  */
 exports.bind = bind;
 exports.unchannel = unchannel;
 exports.channel = channel;
+exports.counter = counter;
