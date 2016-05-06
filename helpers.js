@@ -348,18 +348,16 @@ const counter = function(done) {
             count++;
         },
 
-        decrement: function() {
-            if (--count === 0) {
+        decrement: function(error) {
+            if (error) {
+                var _done = done;
+                done = _.noop;
+                _done(error);
+            } else if (--count === 0) {
                 var _done = done;
                 done = _.noop;
                 _done(null);
             }
-        },
-
-        error: function(error) {
-            var _done = done;
-            done = _.noop;
-            _done(error);
         },
     }
 };

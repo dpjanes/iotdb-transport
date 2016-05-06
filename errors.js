@@ -68,6 +68,17 @@ function NotAppropriate(message) {
 util.inherits(NotAppropriate, Error);
 
 /**
+ *  e.g. something is imporperly formatted
+ */
+function Invalid(message) {
+    Error.call(this);
+    this.message = message || "invalid";
+    this.code = 403;
+}
+
+util.inherits(Invalid, Error);
+
+/**
  *  e.g. doing a PUT on a model
  */
 function MethodNotAllowed(message) {
@@ -140,6 +151,7 @@ exports.NotFound = NotFound;
 exports.NotAuthorized = NotAuthorized;
 exports.Timestamp = Timestamp;
 exports.NotAppropriate = NotAppropriate;
+exports.Invalid = Invalid;
 exports.MethodNotAllowed = MethodNotAllowed;
 exports.ServiceNotAvailable = ServiceNotAvailable;
 exports.NotImplemented = NotImplemented;
