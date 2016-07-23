@@ -33,4 +33,5 @@ exports.unchannel = helpers.unchannel;
 exports.channel = helpers.channel;
 exports.counter = helpers.counter;
 
-exports.errors = require('./errors');
+// for backward compatibility
+exports.errors = require('iotdb-errors');

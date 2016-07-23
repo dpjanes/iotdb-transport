@@ -25,8 +25,6 @@
 var iotdb = require('iotdb');
 var _ = iotdb._;
 
-var join = require('url-join');
-
 var logger = iotdb.logger({
     name: 'iotdb-transport',
     module: 'Transport',
