@@ -24,14 +24,14 @@
 
 exports.connect = require('./connect').connect;
 
-var transport = require('./Transport');
+const transport = require('./Transport');
 exports.Transport = transport.Transport;
 
-var helpers = require('./helpers');
+const transporter = require('./transporter');
+exports.make = transporter.make;
+
+const helpers = require('./helpers');
 exports.bind = helpers.bind;
 exports.unchannel = helpers.unchannel;
 exports.channel = helpers.channel;
 exports.counter = helpers.counter;
-
-// for backward compatibility
-exports.errors = require('iotdb-errors');
