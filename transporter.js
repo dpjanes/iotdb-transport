@@ -26,21 +26,75 @@ const iotdb = require('iotdb');
 const _ = iotdb._;
 const errors = require('iotdb-errors');
 
+const assert = require('assert');
+const Rx = require('rx');
+
 const logger = iotdb.logger({
     name: 'iotdb-transport',
     module: 'transporter',
 });
 
 const make = () => {
-    const self = Object.assign({}, events.EventEmitter.prototype);
+    const self = {
+        rx: {},
+    };
 
-    self.setMaxListeners(0);
+    self.rx.list = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
+    self.rx.updated = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
+    self.rx.put = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
+    self.rx.get = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
+    self.rx.bands = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
 
-    self.list = paramd => { throw errors.ShouldBeImplementedInSubclass(); };
-    self.updated = paramd => { throw errors.ShouldBeImplementedInSubclass(); };
-    self.put = (d, paramd) => { throw errors.ShouldBeImplementedInSubclass(); };
-    self.get = (d, paramd) => { throw errors.ShouldBeImplementedInSubclass(); };
-    self.bands = (d, paramd) => { throw errors.ShouldBeImplementedInSubclass(); };
+    self.list = d => {
+        assert.ok(_.is.Dictionary(d) || _.is.Undefined(d), "d must be a Dictionary or Undefined");
+
+        d = _.d.clone.deep(d || {});
+        delete d.id;
+        delete d.band;
+        delete d.value;
+
+        return Rx.Observable.create(observer => self.rx.list(observer, d));
+    };
+    self.updated = d => {
+        assert.ok(_.is.Dictionary(d) || _.is.Undefined(d), "d must be a Dictionary or Undefined");
+
+        d = _.d.clone.deep(d || {});
+        delete d.id;
+        delete d.band;
+        delete d.value;
+
+        return Rx.Observable.create(observer => self.rx.updated(observer, d));
+    };
+    self.put = d => {
+        assert.ok(_.is.Dictionary(d), "d must be a Dictionary");
+        assert.ok(_.is.String(d.id), "d.id must be a String");
+        assert.ok(_.is.String(d.band), "d.band must be a String");
+        assert.ok(_.is.Dictionary(d.value), "d.value must be a Dictionary");
+
+        d = _.d.clone.deep(d);
+
+        return Rx.Observable.create(observer => self.rx.put(observer, d));
+    };
+    self.get = d => {
+        assert.ok(_.is.Dictionary(d), "d must be a Dictionary");
+        assert.ok(_.is.String(d.id), "d.id must be a String");
+        assert.ok(_.is.String(d.band), "d.band must be a String");
+
+        d = _.d.clone.deep(d);
+        delete d.value;
+
+        return Rx.Observable.create(observer => self.rx.get(observer, d));
+    };
+    self.bands = d => {
+        assert.ok(_.is.Dictionary(d), "d must be a Dictionary");
+        assert.ok(_.is.String(d.id), "d.id must be a String");
+
+        d = _.d.clone.deep(d || {});
+        delete d.band;
+        delete d.value;
+
+        return Rx.Observable.create(observer => self.rx.bands(observer, d));
+    };
 
     return self;
 };
