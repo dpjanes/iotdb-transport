@@ -33,5 +33,9 @@ exports.make = transporter.make;
 const helpers = require('./helpers');
 exports.bind = helpers.bind;
 exports.unchannel = helpers.unchannel;
+exports.old_unchannel = helpers.old_unchannel;
 exports.channel = helpers.channel;
 exports.counter = helpers.counter;
+
+const testers = require("./testers");
+exports.testers = testers;

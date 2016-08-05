@@ -25,6 +25,7 @@
 var iotdb = require('iotdb');
 var _ = iotdb._;
 var errors = require("iotdb-errors");
+var assert = require("assert");
 
 var logger = iotdb.logger({
     name: 'iotdb-transport',
@@ -246,24 +247,16 @@ var bind = function (primary_transport, secondary_transport, paramd) {
 /**
  */
 var channel = function (paramd, id, band) {
-    if (!_.is.Dictionary(paramd)) {
-        throw new Error("channel: 'paramd' must be a Dictionary");
-    }
-    if (id && !_.is.String(id)) {
-        throw new Error("channel: 'id' must be a String or undefined");
-    }
-    if (band && !_.is.String(band)) {
-        throw new Error("channel: 'band' must be a String or undefined");
-    }
+    assert.ok(_.is.Dictionary(paramd), "'paramd' must be a Dictionary");
+    assert.ok(_.is.Undefined(id) || _.is.String(id), "'id' must be a String or undefined");
+    assert.ok(_.is.Undefined(band) || _.is.String(band), "'band' must be a String or undefined");
 
-    paramd = _.defaults(paramd, {
+    paramd = _.d.compose.shallow(paramd, {
         prefix: "",
-        encode: function (s) {
-            return s;
-        },
+        encode: s => s,
     });
 
-    var channel = paramd.prefix;
+    let channel = paramd.prefix;
     if (id) {
         channel = _.net.url.join(channel, paramd.encode(id));
 
@@ -277,7 +270,7 @@ var channel = function (paramd, id, band) {
 
 /**
  */
-var unchannel = function (paramd, path) {
+var old_unchannel = function (paramd, path) {
     if (!_.is.Dictionary(paramd)) {
         throw new Error("unchannel: 'paramd' must be a Dictionary");
     }
@@ -335,6 +328,70 @@ var unchannel = function (paramd, path) {
     }
 };
 
+var unchannel = function (paramd, path) {
+    assert.ok(_.is.Dictionary(paramd), "'paramd' must be a Dictionary");
+    assert.ok(_.is.String(path), "'id' must be a String");
+
+    paramd = _.d.compose.shallow(paramd, {
+        prefix: "",
+        decode: s => s,
+        dot_id: false,
+        dot_band: false,
+    });
+
+    let subpath = path.substring(paramd.prefix.length);
+    subpath = subpath.replace(/^\/*/, '');
+    subpath = subpath.replace(/\/*$/, '');
+    subpath = subpath.replace(/\/+/g, '/');
+
+    let parts = subpath.split("/");
+    parts = _.map(parts, paramd.decode);
+
+    const result = {};
+    let id;
+    let band;
+
+    switch (parts.length) {
+    case 1:
+        id = parts[0];
+        if (!paramd.dot_id && id.match(/^[.]/)) {
+            break;
+        } 
+
+        result.id = id;
+        
+        if (paramd.flat_band) {
+            result.band = paramd.flat_band;
+        }
+        break;
+
+    case 2:
+        id = parts[0];
+        if (!paramd.dot_id && id.match(/^[.]/)) {
+            break;
+        }
+
+        band = parts[1];
+        if (!paramd.dot_band, band.match(/^[.]/)) {
+            break;
+        }
+
+        result.id = id;
+
+        if (paramd.flat_band) {
+            result.band = paramd.flat_band;
+        } else {
+            result.band = band;
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    return result;
+};
+
 /**
  *  Track entering and leaving a code block.
  */
@@ -364,6 +421,7 @@ const counter = function(done) {
  *  API
  */
 exports.bind = bind;
+exports.old_unchannel = old_unchannel;
 exports.unchannel = unchannel;
 exports.channel = channel;
 exports.counter = counter;

@@ -37,14 +37,10 @@ const logger = iotdb.logger({
 const make = () => {
     const self = {
         rx: {},
+        source: {},
     };
 
-    self.rx.list = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
-    self.rx.updated = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
-    self.rx.put = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
-    self.rx.get = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
-    self.rx.bands = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
-
+    // primary intereface
     self.list = d => {
         assert.ok(_.is.Dictionary(d) || _.is.Undefined(d), "d must be a Dictionary or Undefined");
 
@@ -54,6 +50,16 @@ const make = () => {
         delete d.value;
 
         return Rx.Observable.create(observer => self.rx.list(observer, d));
+    };
+    self.added = d => {
+        assert.ok(_.is.Dictionary(d) || _.is.Undefined(d), "d must be a Dictionary or Undefined");
+
+        d = _.d.clone.deep(d || {});
+        delete d.id;
+        delete d.band;
+        delete d.value;
+
+        return Rx.Observable.create(observer => self.rx.added(observer, d));
     };
     self.updated = d => {
         assert.ok(_.is.Dictionary(d) || _.is.Undefined(d), "d must be a Dictionary or Undefined");
@@ -95,6 +101,79 @@ const make = () => {
 
         return Rx.Observable.create(observer => self.rx.bands(observer, d));
     };
+
+    // use - this allows one transport to be the data source for another
+    self.use = (source_transport, d) => {
+        d = _.d.compose.shallow(d, {});
+
+        _.keys(self.rx)
+            .filter(key => d[key] !== false)
+            .forEach(key => {
+                self.rx[key] = source_transport.rx[key];
+            })
+    };
+
+    // monitor - this takes all events from the source
+    self.monitor = (source_transport, d) => {
+        d = _.d.compose.shallow(d, {});
+
+        if (d.all !== false) {
+            source_transport
+                .all({})
+                .subscribe(
+                    ad => {
+                        ad = _.d.clone.shallow(ad);
+                        ad.silent_timestamp = true;
+
+                        self.put(ad).subscribe();
+                    },
+                    error => {
+                        console.log("HERE:MONITOR.ALL.ERROR", error);
+                    }
+                );
+        }
+
+        if (d.updated !== false) {
+            source_transport
+                .updated({})
+                .subscribe(
+                    ud => {
+                        ud = _.d.clone.shallow(ud);
+                        ud.silent_timestamp = true;
+
+                        self.put(ud).subscribe(
+                            x => {},
+                            error => {
+                                console.log("HERE:MONITOR.UPDATED.PUT", error);
+                            }
+                        )
+                    },
+                    error => {
+                        console.log("HERE:MONITOR.UPDATED", error);
+                    }
+                );
+        }
+    };
+
+    // reactive interface - used by subclasses
+    self.rx.list = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
+    self.rx.added = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
+    self.rx.updated = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
+    self.rx.put = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
+    self.rx.get = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
+    self.rx.bands = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
+
+    // helpers
+    self.all = d => self.list(d)
+        .selectMany(ld => self.bands(ld)
+            .selectMany(bd => self.get(bd))
+            .reduce((rd, gd) => {
+                rd.id = gd.id;
+                rd[gd.band] = gd.value;
+                return rd;
+            }, {})
+        );
+
 
     return self;
 };
