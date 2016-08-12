@@ -33,23 +33,23 @@ const log_value = what => [
     () => console.log("+", what, "<end>")
 ];
 
-const put = ( transport, d ) => {
+const put = ( transport, d, tag ) => {
     d = _.d.compose.shallow(d, {
         id: "MyThingID", 
         band: "meta", 
         value: {
             first: "David",
-            last: "Janes",
+            last: "Smith",
             now: _.timestamp.make(),
         },
     });
 
     transport
         .put(d)
-        .subscribe(...log_value("put"));
+        .subscribe(...log_value(tag || "put"));
 };
 
-const get = ( transport, d ) => {
+const get = ( transport, d, tag ) => {
     d = _.d.compose.shallow(d, {
         id: "MyThingID", 
         band: "meta", 
@@ -57,7 +57,7 @@ const get = ( transport, d ) => {
 
     transport
         .get(d)
-        .subscribe(...log_value("get"));
+        .subscribe(...log_value(tag || "get"));
 };
 
 const list = transport => {
@@ -66,25 +66,25 @@ const list = transport => {
         .subscribe(...log_id("list"));
 };
 
-const bands = ( transport, d ) => {
+const bands = ( transport, d, tag ) => {
     d = _.d.compose.shallow(d, { id: "MyThingID" });
     transport
         .bands(d)
-        .subscribe(...log_band("bands"));
+        .subscribe(...log_band(tag || "bands"));
 };
 
-const updated = ( transport, d ) => {
+const updated = ( transport, d, tag ) => {
     d = _.d.compose.shallow(d, {});
     transport
         .updated(d)
-        .subscribe(...log_value("updated"));
+        .subscribe(...log_value(tag || "updated"));
 };
 
-const all = ( transport, d ) => {
+const all = ( transport, d, tag ) => {
     d = _.d.compose.shallow(d, {});
     transport
         .all(d)
-        .subscribe(...log_raw("all"));
+        .subscribe(...log_raw(tag || "all"));
 };
 
 

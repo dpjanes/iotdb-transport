@@ -65,8 +65,6 @@ const make = () => {
         assert.ok(_.is.Dictionary(d) || _.is.Undefined(d), "d must be a Dictionary or Undefined");
 
         d = _.d.clone.deep(d || {});
-        delete d.id;
-        delete d.band;
         delete d.value;
 
         return Rx.Observable.create(observer => self.rx.updated(observer, d));
