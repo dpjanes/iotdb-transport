@@ -28,7 +28,7 @@ const _ = iotdb._;
 const assert = require("assert");
 const helpers = require("../helpers");
 
-describe("test_helpers", function() {
+describe("test_channel", function() {
     describe("no prefix", function() {
         const initd = {};
         it("root", function() {

@@ -57,26 +57,6 @@ const channel = function (paramd, d) {
     }
 
     return parts.join("/").replace(/[\/]+/g, '/');
-
-    /*
-    parts
-        .map(
-        .map(part => part.replace(
-        .map(part => part.replace(/^[\/], '')
-        .filter(part => !_.is.Empty(part))
-        .join("/");
-
-    let channel = paramd.prefix;
-    if (d.id) {
-        channel = _.net.url.join(channel, paramd.encode(d.id));
-
-        if (d.band && !paramd.flat_band) {
-            channel = _.net.url.join(channel, paramd.encode(d.band));
-        }
-    }
-
-    return channel;
-    */
 };
 
 const unchannel = function (paramd, path) {
@@ -86,53 +66,37 @@ const unchannel = function (paramd, path) {
     paramd = _.d.compose.shallow(paramd, {
         prefix: "",
         decode: s => s,
-        dot_id: false,
-        dot_band: false,
     });
 
-    let subpath = path.substring(paramd.prefix.length);
-    subpath = subpath.replace(/^\/*/, '');
-    subpath = subpath.replace(/\/*$/, '');
-    subpath = subpath.replace(/\/+/g, '/');
+    path = path.replace(/\/+/g, '/');
 
-    let parts = subpath.split("/");
-    parts = _.map(parts, paramd.decode);
+    if (path.indexOf(paramd.prefix) !== 0) {
+        return {};
+    }
 
-    const result = {};
-    let id;
-    let band;
+    const subpath = path.substring(paramd.prefix.length)
+    const parts = subpath.split("/")
+        .map(paramd.decode)
+        .filter(part => !_.is.Empty(part));
+
+    const rd = {};
 
     switch (parts.length) {
     case 1:
-        id = parts[0];
-        if (!paramd.dot_id && id.match(/^[.]/)) {
-            break;
-        } 
-
-        result.id = id;
+        rd.id = parts[0];
         
         if (paramd.flat_band) {
-            result.band = paramd.flat_band;
+            rd.band = paramd.flat_band;
         }
         break;
 
     case 2:
-        id = parts[0];
-        if (!paramd.dot_id && id.match(/^[.]/)) {
-            break;
-        }
-
-        band = parts[1];
-        if (!paramd.dot_band, band.match(/^[.]/)) {
-            break;
-        }
-
-        result.id = id;
+        rd.id = parts[0];
 
         if (paramd.flat_band) {
-            result.band = paramd.flat_band;
+            rd.band = paramd.flat_band;
         } else {
-            result.band = band;
+            rd.band = parts[1];
         }
         break;
 
@@ -140,7 +104,7 @@ const unchannel = function (paramd, path) {
         break;
     }
 
-    return result;
+    return rd;
 };
 
 /**
