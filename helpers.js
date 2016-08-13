@@ -43,6 +43,29 @@ const channel = function (paramd, d) {
         encode: s => s,
     });
 
+    const parts = [];
+    if (!_.is.Empty(paramd.prefix)) {
+        parts.push(paramd.prefix);
+    }
+
+    if (d.id) {
+        parts.push(paramd.encode(d.id));
+
+        if (d.band && !paramd.flat_band) {
+            parts.push(paramd.encode(d.band));
+        }
+    }
+
+    return parts.join("/").replace(/[\/]+/g, '/');
+
+    /*
+    parts
+        .map(
+        .map(part => part.replace(
+        .map(part => part.replace(/^[\/], '')
+        .filter(part => !_.is.Empty(part))
+        .join("/");
+
     let channel = paramd.prefix;
     if (d.id) {
         channel = _.net.url.join(channel, paramd.encode(d.id));
@@ -53,6 +76,7 @@ const channel = function (paramd, d) {
     }
 
     return channel;
+    */
 };
 
 const unchannel = function (paramd, path) {
