@@ -24,18 +24,12 @@
 
 exports.connect = require('./connect').connect;
 
-const transport = require('./Transport');
-exports.Transport = transport.Transport;
-
 const transporter = require('./transporter');
 exports.make = transporter.make;
 
 const helpers = require('./helpers');
-exports.bind = helpers.bind;
-exports.unchannel = helpers.unchannel;
-exports.old_unchannel = helpers.old_unchannel;
 exports.channel = helpers.channel;
-exports.counter = helpers.counter;
+exports.unchannel = helpers.unchannel;
 
 const testers = require("./testers");
 exports.testers = testers;
