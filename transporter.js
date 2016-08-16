@@ -121,7 +121,7 @@ const make = () => {
                 .subscribe(
                     ad => {
                         ad = _.d.clone.shallow(ad);
-                        ad.silent_timestamp = true;
+                        ad.silent = true;
 
                         self.put(ad).subscribe();
                     },
@@ -137,7 +137,7 @@ const make = () => {
                 .subscribe(
                     ud => {
                         ud = _.d.clone.shallow(ud);
-                        ud.silent_timestamp = true;
+                        ud.silent = true;
 
                         self.put(ud).subscribe(
                             x => {},
