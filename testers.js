@@ -101,6 +101,13 @@ const all = ( transport, d, tag ) => {
         .subscribe(...log_raw(tag || "all"));
 };
 
+const one = ( transport, d, tag ) => {
+    d = _.d.compose.shallow(d, {});
+    transport
+        .one(d)
+        .subscribe(...log_raw(tag || "one"));
+};
+
 
 /*
  *  API
@@ -116,3 +123,4 @@ exports.bands = bands;
 exports.updated = updated;
 exports.get = get;
 exports.all = all;
+exports.one = one;

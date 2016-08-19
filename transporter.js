@@ -184,6 +184,13 @@ const make = () => {
                 return rd;
             }, {})
         );
+    self.one = d => self.bands(d)
+        .selectMany(bd => self.get(bd))
+        .reduce((rd, gd) => {
+            rd.id = gd.id;
+            rd[gd.band] = gd.value;
+            return rd;
+        }, {});
 
 
     return self;

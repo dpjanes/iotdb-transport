@@ -19,6 +19,10 @@ Typical bands are:
 
 A Transporter is a collection of all the band data for some group of Things.
 
+You can read more about bands [here](https://github.com/dpjanes/iotdb-thing). 
+Note that though transporters don't use these Thing objects, it's really
+easy to create Things from transporters using `all` or `one`.
+
 ## Why?
 
 Transporters are designed to plug together like Legos, to move data around. 
@@ -99,6 +103,8 @@ Get the bands for a Thing. `d.id`
 ## Helper Methods
 
 ### all(d)
+
+### one(d)
 
 ## Binding Methods
 
