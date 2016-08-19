@@ -31,9 +31,10 @@ echo "=================="
 
     tar cf - \
         --exclude "node_modules" \
+        --exclude "Gruntfile.js" \
         README.md LICENSE \
         homestar.json package.json \
-        Transport.js connect.js helpers.js index.js \
+        *.js \
         bin/transport \
         |
     ( cd "${NPM_DST}" && tar xvf - && npm publish ) || exit 1
