@@ -29,6 +29,8 @@ const errors = require('iotdb-errors');
 const assert = require('assert');
 const Rx = require('rx');
 
+const iotdb_transport = require("./transporter");
+
 const logger = iotdb.logger({
     name: 'iotdb-transport',
     module: 'transporter',
@@ -52,30 +54,35 @@ const make = (initd) => {
         }
     };
 
+    const _error = error => 
+        Rx.Observable.create(function (observer) {
+            observer.onError(error);
+        });
+
     // replace interface
     self.list = d => original.list(d).filter(_filter_read);
     self.added = d => original.added(d).filter(_filter_read);
     self.updated = d => original.updated(d).filter(_filter_read);
     self.put = d => {
-        const error = initd.check_write(item);
+        const error = _initd.check_write(d);
         if (error) {
-            return Rx.Observable.error(error);
+            return _error(error);
         } else {
             return original.put(d);
         }
     };
     self.get = d => {
-        const error = initd.check_read(d);
+        const error = _initd.check_read(d);
         if (error) {
-            return Rx.Observable.error(error);
+            return _error(error);
         }
 
         return original.get(d);
     };
     self.bands = d => {
-        const error = initd.check_read(d);
+        const error = _initd.check_read(d);
         if (error) {
-            return Rx.Observable.error(error);
+            return _error(error);
         }
 
         return original.bands(d);

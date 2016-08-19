@@ -104,20 +104,46 @@ Get the bands for a Thing. `d.id`
 
 ### all(d)
 
+Will iterate through each Thing with all its bands in one dictionary.
+
 ### one(d)
+
+Similar to `all` but will only return the Thing matching `d.id`
 
 ## Binding Methods
 
-### use(source_transport, d)
-### monitor(source_transport, d)
+### use(source\_transport, d)
+### monitor(source\_transport, d)
+
+# Access Transporter
+
+This Transport can be to control what items can be read fro
+or written to. 
+
+Note that at this time there's no support for controlling
+what can be seen in the `value`. It's all or nothing.
+
+Here's an example that will deny access to `ThingB`.
+In the case of `list`, `updated` and `added` it will
+be as if the Thing never existed. `get` and `bands`
+will observe the error.
+
+    const base = require("iotdb-transport");
+    const errors = require("iotdb-errors");
+    const access_transporter = base.access.make({
+        check_read: d => {
+            if (d.id === "ThingB") {
+                return new errors.AccessDenied()
+            }
+        }
+    });
+
+You can use `check_write` to control access to `put`.
 
 # Sample Code
 
 Sample code can be found on GitHub in various concrete implementations of the Transporters.
 The [Express Transporter](https://github.com/dpjanes/iotdb-transport-express) is a good place
 to start.
-
-
-
 
 
