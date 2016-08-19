@@ -111,7 +111,7 @@ const make = () => {
             })
     };
 
-    // monitor - this takes all events from the source
+    // monitor - this takes all data from the source
     self.monitor = (source_transport, d) => {
         d = _.d.compose.shallow(d, {});
 
@@ -119,11 +119,27 @@ const make = () => {
             source_transport
                 .all({})
                 .subscribe(
-                    ad => {
-                        ad = _.d.clone.shallow(ad);
-                        ad.silent = true;
+                    bandd => {
+                        if (!bandd.id) {
+                            return
+                        }
 
-                        self.put(ad).subscribe();
+                        _.mapObject(( value, band ) => {
+                            if (!_.is.Dictionary(value)) {
+                                return;
+                            }
+
+                            self.put({
+                                id: bandd.id,
+                                band: band,
+                                value: value
+                            }).subscribe(
+                                x => {},
+                                error => {
+                                    console.log("HERE:MONITOR.ALL.PUT", error);
+                                }
+                            );
+                        })
                     },
                     error => {
                         console.log("HERE:MONITOR.ALL.ERROR", error);
@@ -136,9 +152,6 @@ const make = () => {
                 .updated({})
                 .subscribe(
                     ud => {
-                        ud = _.d.clone.shallow(ud);
-                        ud.silent = true;
-
                         self.put(ud).subscribe(
                             x => {},
                             error => {

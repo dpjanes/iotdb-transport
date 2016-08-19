@@ -31,5 +31,8 @@ const helpers = require('./helpers');
 exports.channel = helpers.channel;
 exports.unchannel = helpers.unchannel;
 
+const access = require("./access");
+exports.access = access;
+
 const testers = require("./testers");
 exports.testers = testers;
