@@ -22,8 +22,6 @@
 
 "use strict";
 
-exports.connect = require('./connect').connect;
-
 const transporter = require('./transporter');
 exports.make = transporter.make;
 
