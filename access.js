@@ -36,57 +36,41 @@ const logger = iotdb.logger({
     module: 'transporter',
 });
 
-const make = (initd) => {
+const make = (initd, original) => {
     const self = iotdb_transport.make();
-    const original = _.d.clone.shallow(self);
+    // const original = _.d.clone.shallow(self);
     const _initd = _.d.compose.shallow(initd, {
         check_read: (d) => null,
         check_write: (d) => null,
     });
 
-    // internals
-    const _filter_read = item => {
-        const result = _initd.check_read(item);
-        if (_.is.Error(result)) {
-            return false;
-        } else {
-            return true;
-        }
-    };
+    const _filter = ( observer, d, command, how ) => {
+        Rx.Observable.create(sub_observer => original.rx[command](sub_observer, d))
+            .filter(item => !_.is.Error(_initd[how](item)))
+            .subscribe(
+                next => observer.onNext(next),
+                error => observer.onError(error),
+                () => observer.onCompleted()
+            );
+    }
 
-    const _error = error => 
-        Rx.Observable.create(function (observer) {
-            observer.onError(error);
-        });
+    const _check = ( observer, d, command, how ) => {
+        const error = _initd[how](d);
+        if (error) {
+            return observer.onError(error);
+        } else {
+            return original.rx[command](observer, d);
+        }
+    }
 
     // replace interface
-    self.list = d => original.list(d).filter(_filter_read);
-    self.added = d => original.added(d).filter(_filter_read);
-    self.updated = d => original.updated(d).filter(_filter_read);
-    self.put = d => {
-        const error = _initd.check_write(d);
-        if (error) {
-            return _error(error);
-        } else {
-            return original.put(d);
-        }
-    };
-    self.get = d => {
-        const error = _initd.check_read(d);
-        if (error) {
-            return _error(error);
-        }
+    self.rx.list = ( observer, d) => _filter(observer, d, "list", "check_read");
+    self.rx.added = ( observer, d) => _filter(observer, d, "added", "check_read");
+    self.rx.updated = ( observer, d) => _filter(observer, d, "updated", "check_read");
 
-        return original.get(d);
-    };
-    self.bands = d => {
-        const error = _initd.check_read(d);
-        if (error) {
-            return _error(error);
-        }
-
-        return original.bands(d);
-    };
+    self.rx.put = ( observer, d) => _check(observer, d, "put", "check_write");
+    self.rx.get = ( observer, d) => _check(observer, d, "get", "check_read");
+    self.rx.bands = ( observer, d) => _check(observer, d, "bands", "check_read");
 
     return self;
 };
