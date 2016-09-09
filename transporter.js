@@ -136,15 +136,56 @@ const make = () => {
                             }).subscribe(
                                 x => {},
                                 error => {
-                                    console.log("HERE:MONITOR.ALL.PUT", error);
+                                    console.log("#", "HERE:MONITOR.ALL.PUT", error);
                                 }
                             );
                         })
                     },
                     error => {
-                        console.log("HERE:MONITOR.ALL.ERROR", error);
+                        console.log("#", "HERE:MONITOR.ALL.ERROR", error);
                     }
                 );
+        }
+
+        if (d.added !== false) {
+            source_transport
+                .added({})
+                .subscribe(
+                    ad => {
+                        source_transport
+                            .one(ad)
+                            .subscribe(
+                                bandd => {
+                                    if (!bandd.id) {
+                                        return
+                                    }
+
+                                    _.mapObject(( value, band ) => {
+                                        if (!_.is.Dictionary(value)) {
+                                            return;
+                                        }
+
+                                        self.put({
+                                            id: bandd.id,
+                                            band: band,
+                                            value: value
+                                        }).subscribe(
+                                            x => {},
+                                            error => {
+                                                console.log("#", "HERE:MONITOR.ADDED.PUT", error);
+                                            }
+                                        );
+                                    })
+                                },
+                                error => {
+                                    console.log("#", "HERE:MONITOR.ALL.ERROR", error);
+                                }
+                            );
+                    },
+                    error => {
+                        console.log("#", "HERE:MONITOR.ADDED", error);
+                    }
+                )
         }
 
         if (d.updated !== false) {
@@ -155,12 +196,12 @@ const make = () => {
                         self.put(ud).subscribe(
                             x => {},
                             error => {
-                                console.log("HERE:MONITOR.UPDATED.PUT", error);
+                                console.log("#", "HERE:MONITOR.UPDATED.PUT", error);
                             }
                         )
                     },
                     error => {
-                        console.log("HERE:MONITOR.UPDATED", error);
+                        console.log("#", "HERE:MONITOR.UPDATED", error);
                     }
                 );
         }

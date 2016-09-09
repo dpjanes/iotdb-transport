@@ -36,16 +36,16 @@ const logger = iotdb.logger({
     module: 'transporter',
 });
 
-const make = (initd, original) => {
+const make = (initd, underlying) => {
     const self = iotdb_transport.make();
-    // const original = _.d.clone.shallow(self);
+
     const _initd = _.d.compose.shallow(initd, {
         check_read: (d) => null,
         check_write: (d) => null,
     });
 
     const _filter = ( observer, d, command, how ) => {
-        Rx.Observable.create(sub_observer => original.rx[command](sub_observer, d))
+        Rx.Observable.create(sub_observer => underlying.rx[command](sub_observer, d))
             .filter(item => !_.is.Error(_initd[how](item)))
             .subscribe(
                 next => observer.onNext(next),
@@ -59,7 +59,7 @@ const make = (initd, original) => {
         if (error) {
             return observer.onError(error);
         } else {
-            return original.rx[command](observer, d);
+            return underlying.rx[command](observer, d);
         }
     }
 
