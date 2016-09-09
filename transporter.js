@@ -124,7 +124,7 @@ const make = () => {
                             return
                         }
 
-                        _.mapObject(( value, band ) => {
+                        _.mapObject(bandd, ( value, band ) => {
                             if (!_.is.Dictionary(value)) {
                                 return;
                             }
@@ -136,7 +136,10 @@ const make = () => {
                             }).subscribe(
                                 x => {},
                                 error => {
-                                    console.log("#", "HERE:MONITOR.ALL.PUT", error);
+                                    logger.info({
+                                        method: "monitor/all/put",
+                                        error: _.error.message(error),
+                                    }, "(usually) ignorable error");
                                 }
                             );
                         })
@@ -160,7 +163,7 @@ const make = () => {
                                         return
                                     }
 
-                                    _.mapObject(( value, band ) => {
+                                    _.mapObject(bandd, ( value, band ) => {
                                         if (!_.is.Dictionary(value)) {
                                             return;
                                         }
@@ -172,7 +175,10 @@ const make = () => {
                                         }).subscribe(
                                             x => {},
                                             error => {
-                                                console.log("#", "HERE:MONITOR.ADDED.PUT", error);
+                                                logger.info({
+                                                    method: "monitor/added/put",
+                                                    error: _.error.message(error),
+                                                }, "(usually) ignorable error");
                                             }
                                         );
                                     })
@@ -196,7 +202,10 @@ const make = () => {
                         self.put(ud).subscribe(
                             x => {},
                             error => {
-                                console.log("#", "HERE:MONITOR.UPDATED.PUT", error);
+                                logger.info({
+                                    method: "monitor/updated/put",
+                                    error: _.error.message(error),
+                                }, "(usually) ignorable error");
                             }
                         )
                     },
