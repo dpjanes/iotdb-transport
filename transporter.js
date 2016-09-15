@@ -113,7 +113,9 @@ const make = () => {
 
     // monitor - this takes all data from the source
     self.monitor = (source_transport, d) => {
-        d = _.d.compose.shallow(d, {});
+        d = _.d.compose.shallow(d, {
+            check_read: (d) => null,
+        });
 
         if (d.all !== false) {
             source_transport
@@ -129,11 +131,18 @@ const make = () => {
                                 return;
                             }
 
-                            self.put({
+                            const pd = {
                                 id: bandd.id,
                                 band: band,
                                 value: value
-                            }).subscribe(
+                            };
+
+                            const read_error = d.check_read(pd);
+                            if (_.is.Error(read_error)) {
+                                return;
+                            }
+
+                            self.put(pd).subscribe(
                                 x => {},
                                 error => {
                                     logger.info({
@@ -168,11 +177,18 @@ const make = () => {
                                             return;
                                         }
 
-                                        self.put({
+                                        const pd = {
                                             id: bandd.id,
                                             band: band,
                                             value: value
-                                        }).subscribe(
+                                        };
+
+                                        const read_error = d.check_read(pd);
+                                        if (_.is.Error(read_error)) {
+                                            return;
+                                        }
+
+                                        self.put(pd).subscribe(
                                             x => {},
                                             error => {
                                                 logger.info({
@@ -199,15 +215,29 @@ const make = () => {
                 .updated({})
                 .subscribe(
                     ud => {
-                        self.put(ud).subscribe(
-                            x => {},
-                            error => {
-                                logger.info({
-                                    method: "monitor/updated/put",
-                                    error: _.error.message(error),
-                                }, "(usually) ignorable error");
-                            }
-                        )
+                        const read_error = d.check_read(ud);
+                        if (_.is.Error(read_error)) {
+                            return;
+                        }
+
+                        source_transport
+                            .get(ud)
+                            .subscribe(
+                                gd => {
+                                    self.put(gd).subscribe(
+                                        x => {},
+                                        error => {
+                                            logger.info({
+                                                method: "monitor/updated/put",
+                                                error: _.error.message(error),
+                                            }, "(usually) ignorable error");
+                                        }
+                                    )
+                                },
+                                error => {
+                                    console.log("#", "HERE:MONITOR.UPDATED.GET", error);
+                                }
+                            );
                     },
                     error => {
                         console.log("#", "HERE:MONITOR.UPDATED", error);
