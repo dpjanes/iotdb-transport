@@ -207,12 +207,12 @@ const make = () => {
     };
 
     // reactive interface - used by subclasses
-    self.rx.list = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
-    self.rx.added = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
-    self.rx.updated = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
-    self.rx.put = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
-    self.rx.get = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
-    self.rx.bands = (observer, d) => { throw errors.ShouldBeImplementedInSubclass(); };
+    self.rx.list = (observer, d) => observer.onError(new errors.ShouldBeImplementedInSubclass());
+    self.rx.added = (observer, d) => observer.onError(new errors.ShouldBeImplementedInSubclass());
+    self.rx.updated = (observer, d) => observer.onError(new errors.ShouldBeImplementedInSubclass());
+    self.rx.put = (observer, d) => observer.onError(new errors.ShouldBeImplementedInSubclass());
+    self.rx.get = (observer, d) => observer.onError(new errors.ShouldBeImplementedInSubclass());
+    self.rx.bands = (observer, d) => observer.onError(new errors.ShouldBeImplementedInSubclass());
 
     // helpers
     self.all = d => self.list(d)
