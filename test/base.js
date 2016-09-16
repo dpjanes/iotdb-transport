@@ -267,4 +267,80 @@ describe("base", function() {
             });
         });
     });
+    describe("reactive interface", function() {
+        describe("list", function() {
+            it('exists', function(done) {
+                const t = transporter.make();
+                assert(_.is.Function(t.rx.list));
+                done();
+            });
+        });
+        describe("added", function() {
+            it('exists', function(done) {
+                const t = transporter.make();
+                assert(_.is.Function(t.rx.added));
+                done();
+            });
+        });
+        describe("updated", function() {
+            it('exists', function(done) {
+                const t = transporter.make();
+                assert(_.is.Function(t.rx.updated));
+                done();
+            });
+        });
+        describe("get", function() {
+            it('exists', function(done) {
+                const t = transporter.make();
+                assert(_.is.Function(t.rx.get));
+                done();
+            });
+        });
+        describe("put", function() {
+            it('exists', function(done) {
+                const t = transporter.make();
+                assert(_.is.Function(t.rx.put));
+                done();
+            });
+        });
+        describe("bands", function() {
+            it('exists', function(done) {
+                const t = transporter.make();
+                assert(_.is.Function(t.rx.bands));
+                done();
+            });
+        });
+    });
+    describe("thing interface", function() {
+        describe("one", function() {
+            it('exists', function(done) {
+                const t = transporter.make();
+                assert(_.is.Function(t.one));
+                done();
+            });
+        });
+        describe("all", function() {
+            it('exists', function(done) {
+                const t = transporter.make();
+                assert(_.is.Function(t.all));
+                done();
+            });
+        });
+    });
+    describe("binding interface", function() {
+        describe("use", function() {
+            it('exists', function(done) {
+                const t = transporter.make();
+                assert(_.is.Function(t.use));
+                done();
+            });
+        });
+        describe("monitor", function() {
+            it('exists', function(done) {
+                const t = transporter.make();
+                assert(_.is.Function(t.monitor));
+                done();
+            });
+        });
+    });
 });
