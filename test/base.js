@@ -93,7 +93,7 @@ describe("base", function() {
                 const o = t.added();
                 done();
             })
-            it('fails', function(done) {
+            it('returns error observable', function(done) {
                 const t = transporter.make();
                 const o = t.added({})
                 o.subscribe(
@@ -122,7 +122,7 @@ describe("base", function() {
                 const o = t.updated();
                 done();
             })
-            it('fails', function(done) {
+            it('returns error observable', function(done) {
                 const t = transporter.make();
                 const o = t.updated({})
                 o.subscribe(
@@ -166,9 +166,97 @@ describe("base", function() {
                 assert.ok(_isObservable(o));
                 done();
             });
-            it('fails', function(done) {
+            it('returns error observable', function(done) {
                 const t = transporter.make();
                 const o = t.get({id: "123", band: "meta"})
+                o.subscribe(
+                    result => assert(false, "this should not be called"),
+                    error => {
+                        assert.ok(error instanceof errors.ShouldBeImplementedInSubclass)
+                        done()
+                    }
+                )
+            });
+        });
+        describe("put", function() {
+            it('exists', function(done) {
+                const t = transporter.make();
+                assert.ok(t.put)
+                done();
+            });
+            it('requires an argument', function(done) {
+                const t = transporter.make();
+                assert.throws(() => t.put(), Error)
+                done();
+            })
+            it('requires id', function(done) {
+                const t = transporter.make();
+                assert.throws(() => t.put({}), Error)
+                done();
+            })
+            it('requires band', function(done) {
+                const t = transporter.make();
+                assert.throws(() => t.put({ id: "123" }), Error)
+                done();
+            })
+            it('requires id and band', function(done) {
+                const t = transporter.make();
+                assert.throws(() => t.put({ id: "123", band: "meta" }));
+                done();
+            })
+            it('requires id, band and value', function(done) {
+                const t = transporter.make();
+                t.put({ id: "123", band: "meta", value: {} });
+                done();
+            })
+            it('requires value to be a dictionary', function(done) {
+                const t = transporter.make();
+                assert.throws(() => t.put({ id: "123", band: "meta", value: 123 }));
+                done();
+            })
+            it('returns Rx.Observable', function(done) {
+                const t = transporter.make();
+                const o = t.put({id: "123", band: "meta", value: {} })
+                assert.ok(_isObservable(o));
+                done();
+            });
+            it('returns error observable', function(done) {
+                const t = transporter.make();
+                const o = t.put({id: "123", band: "meta", value: {}})
+                o.subscribe(
+                    result => assert(false, "this should not be called"),
+                    error => {
+                        assert.ok(error instanceof errors.ShouldBeImplementedInSubclass)
+                        done()
+                    }
+                )
+            });
+        });
+        describe("bands", function() {
+            it('exists', function(done) {
+                const t = transporter.make();
+                assert.ok(t.bands)
+                done();
+            });
+            it('requires an argument', function(done) {
+                const t = transporter.make();
+                assert.throws(() => t.bands(), Error)
+                done();
+            })
+            it('requires id', function(done) {
+                const t = transporter.make();
+                assert.throws(() => t.bands({}), Error)
+                done();
+            })
+            it('returns Rx.Observable', function(done) {
+                const t = transporter.make();
+                const o = t.bands({id: "123" })
+                assert.ok(_isObservable(o));
+                done();
+            });
+            it('returns error observable', function(done) {
+                const t = transporter.make();
+                const o = t.bands({id: "123", })
                 o.subscribe(
                     result => assert(false, "this should not be called"),
                     error => {
