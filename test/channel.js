@@ -1,11 +1,11 @@
 /*
- *  test_channel.js
+ *  channel.js
  *
  *  David Janes
  *  IOTDB.org
  *  2016-08-13
  *
- *  Copyright [2013-2015] [David P. Janes]
+ *  Copyright [2013-2016] [David P. Janes]
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ const _ = iotdb._;
 const assert = require("assert");
 const helpers = require("../helpers");
 
-describe("test_channel", function() {
+describe("channel", function() {
     describe("no prefix", function() {
         const initd = {};
         it("root", function() {
