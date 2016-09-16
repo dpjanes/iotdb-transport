@@ -115,47 +115,59 @@ const make = () => {
     self.monitor = (source_transport, d) => {
         d = _.d.compose.shallow(d, {
             check_read: (d) => null,
+            check_write: (d) => null,
         });
+
+        const _put_band = pd => {
+            const read_error = d.check_read(pd);
+            if (_.is.Error(read_error)) {
+                return;
+            }
+
+            self.put(pd).subscribe(
+                x => {},
+                error => {
+                    if (error instanceof errors.Timestamp) {
+                        const write_error = d.check_write(pd);
+                        if (_.is.Error(write_error)) {
+                            return;
+                        }
+
+                        self.get(pd).subscribe(gd => source_transport.put(gd).subscribe());
+                        return;
+                    }
+                    logger.info({
+                        method: "monitor/_put_band",
+                        error: _.error.message(error),
+                    }, "(usually) ignorable error");
+                }
+            );
+        };
+
+        const _put_bandd = bandd => {
+            if (!bandd.id) {
+                return
+            }
+
+            _.mapObject(bandd, ( value, band ) => {
+                if (!_.is.Dictionary(value)) {
+                    return;
+                }
+
+                _put_band({
+                    id: bandd.id,
+                    band: band,
+                    value: value
+                });
+            });
+        };
 
         if (d.all !== false) {
             source_transport
                 .all({})
                 .subscribe(
-                    bandd => {
-                        if (!bandd.id) {
-                            return
-                        }
-
-                        _.mapObject(bandd, ( value, band ) => {
-                            if (!_.is.Dictionary(value)) {
-                                return;
-                            }
-
-                            const pd = {
-                                id: bandd.id,
-                                band: band,
-                                value: value
-                            };
-
-                            const read_error = d.check_read(pd);
-                            if (_.is.Error(read_error)) {
-                                return;
-                            }
-
-                            self.put(pd).subscribe(
-                                x => {},
-                                error => {
-                                    logger.info({
-                                        method: "monitor/all/put",
-                                        error: _.error.message(error),
-                                    }, "(usually) ignorable error");
-                                }
-                            );
-                        })
-                    },
-                    error => {
-                        console.log("#", "HERE:MONITOR.ALL.ERROR", error);
-                    }
+                    bandd => _put_bandd,
+                    error => console.log("#", "HERE:MONITOR.ALL", error)
                 );
         }
 
@@ -166,48 +178,10 @@ const make = () => {
                     ad => {
                         source_transport
                             .one(ad)
-                            .subscribe(
-                                bandd => {
-                                    if (!bandd.id) {
-                                        return
-                                    }
-
-                                    _.mapObject(bandd, ( value, band ) => {
-                                        if (!_.is.Dictionary(value)) {
-                                            return;
-                                        }
-
-                                        const pd = {
-                                            id: bandd.id,
-                                            band: band,
-                                            value: value
-                                        };
-
-                                        const read_error = d.check_read(pd);
-                                        if (_.is.Error(read_error)) {
-                                            return;
-                                        }
-
-                                        self.put(pd).subscribe(
-                                            x => {},
-                                            error => {
-                                                logger.info({
-                                                    method: "monitor/added/put",
-                                                    error: _.error.message(error),
-                                                }, "(usually) ignorable error");
-                                            }
-                                        );
-                                    })
-                                },
-                                error => {
-                                    console.log("#", "HERE:MONITOR.ALL.ERROR", error);
-                                }
-                            );
+                            .subscribe(_put_bandd)
                     },
-                    error => {
-                        console.log("#", "HERE:MONITOR.ADDED", error);
-                    }
-                )
+                    error => console.log("#", "HERE:MONITOR.ADDED", error)
+                );
         }
 
         if (d.updated !== false) {
@@ -223,25 +197,11 @@ const make = () => {
                         source_transport
                             .get(ud)
                             .subscribe(
-                                gd => {
-                                    self.put(gd).subscribe(
-                                        x => {},
-                                        error => {
-                                            logger.info({
-                                                method: "monitor/updated/put",
-                                                error: _.error.message(error),
-                                            }, "(usually) ignorable error");
-                                        }
-                                    )
-                                },
-                                error => {
-                                    console.log("#", "HERE:MONITOR.UPDATED.GET", error);
-                                }
+                                gd => _put_band,
+                                error => console.log("#", "HERE:MONITOR.UPDATED.GET", error)
                             );
                     },
-                    error => {
-                        console.log("#", "HERE:MONITOR.UPDATED", error);
-                    }
+                    error => console.log("#", "HERE:MONITOR.UPDATED", error)
                 );
         }
     };
