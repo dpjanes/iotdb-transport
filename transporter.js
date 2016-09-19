@@ -22,6 +22,8 @@
 
 "use strict";
 
+// const longjohn = require('longjohn');
+
 const iotdb = require('iotdb');
 const _ = iotdb._;
 const errors = require('iotdb-errors');
@@ -38,6 +40,7 @@ const make = () => {
     const self = {
         rx: {},
         source: {},
+        name: "iotdb-transport",
     };
 
     // primary intereface
@@ -202,14 +205,16 @@ const make = () => {
                             return;
                         }
 
-                        source_transport
-                            .get(ud)
-                            .subscribe(
-                                gd => {
-                                    _put_band(gd)
-                                },
-                                error => console.log("#", "HERE:MONITOR.UPDATED.GET", error)
-                            );
+                        if (ud.value) {
+                            _put_band(ud)
+                        } else {
+                            source_transport
+                                .get(ud)
+                                .subscribe(
+                                    gd => _put_band(gd),
+                                    error => console.log("#", "HERE:MONITOR.UPDATED.GET", error)
+                                );
+                        }
                     },
                     error => console.log("#", "HERE:MONITOR.UPDATED", error)
                 );

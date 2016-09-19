@@ -56,7 +56,7 @@ const make = (initd, underlying) => {
 
     const _check = ( observer, d, command, how ) => {
         const error = _initd[how](d);
-        if (error) {
+        if (_.is.Error(error)) {
             return observer.onError(error);
         } else {
             return underlying.rx[command](observer, d);
