@@ -111,16 +111,17 @@ const make = () => {
             })
     };
 
-    // monitor - this takes all data from the source
-    self.monitor = (source_transport, d) => {
-        d = _.d.compose.shallow(d, {
-            check_read: (d) => null,
-            check_write: (d) => null,
+    // monitor - this takes all data from the source and puts it into destination (self)
+    self.monitor = (source_transport, _d) => {
+        const d = _.d.compose.shallow(_d, {
+            check_source: (d) => null,
+            check_destination: (d) => null,
         });
 
         const _put_band = pd => {
-            const read_error = d.check_read(pd);
+            const read_error = d.check_source(pd);
             if (_.is.Error(read_error)) {
+                // console.log("REJECT")
                 return;
             }
 
@@ -128,14 +129,21 @@ const make = () => {
                 x => {},
                 error => {
                     if (error instanceof errors.Timestamp) {
-                        const write_error = d.check_write(pd);
+                        const write_error = d.check_destination(pd);
                         if (_.is.Error(write_error)) {
                             return;
                         }
 
-                        self.get(pd).subscribe(gd => source_transport.put(gd).subscribe());
+                        self.get(pd).subscribe(
+                            gd => source_transport.put(gd)
+                                .subscribe(
+                                    pd => {},
+                                    error => {}
+                                ),
+                            error => {})
                         return;
                     }
+
                     logger.info({
                         method: "monitor/_put_band",
                         error: _.error.message(error),
@@ -189,7 +197,7 @@ const make = () => {
                 .updated({})
                 .subscribe(
                     ud => {
-                        const read_error = d.check_read(ud);
+                        const read_error = d.check_source(ud);
                         if (_.is.Error(read_error)) {
                             return;
                         }
@@ -197,7 +205,9 @@ const make = () => {
                         source_transport
                             .get(ud)
                             .subscribe(
-                                gd => _put_band,
+                                gd => {
+                                    _put_band(gd)
+                                },
                                 error => console.log("#", "HERE:MONITOR.UPDATED.GET", error)
                             );
                     },
