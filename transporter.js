@@ -102,6 +102,16 @@ const make = () => {
 
         return Rx.Observable.create(observer => self.rx.bands(observer, d));
     };
+    self.delete = d => {
+        assert.ok(_.is.Dictionary(d), "d must be a Dictionary");
+        assert.ok(_.is.String(d.id), "d.id must be a String");
+
+        d = _.d.clone.deep(d || {});
+        delete d.band;
+        delete d.value;
+
+        return Rx.Observable.create(observer => self.rx.delete(observer, d));
+    };
 
     // use - this allows one transport to be the data source for another
     self.use = (source_transport, d) => {
@@ -228,6 +238,7 @@ const make = () => {
     self.rx.put = (observer, d) => observer.onError(new errors.ShouldBeImplementedInSubclass());
     self.rx.get = (observer, d) => observer.onError(new errors.ShouldBeImplementedInSubclass());
     self.rx.bands = (observer, d) => observer.onError(new errors.ShouldBeImplementedInSubclass());
+    self.rx.delete = (observer, d) => observer.onError(new errors.ShouldBeImplementedInSubclass());
 
     // helpers
     self.all = d => self.list(d)
