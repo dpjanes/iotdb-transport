@@ -87,6 +87,13 @@ const bands = ( transport, d, tag ) => {
         .subscribe(...log_band(tag || "bands"));
 };
 
+const remove = ( transport, d, tag ) => {
+    d = _.d.compose.shallow(d, { id: "MyThingID" });
+    transport
+        .remove(d)
+        .subscribe(...log_band(tag || "remove"));
+};
+
 const updated = ( transport, d, tag ) => {
     d = _.d.compose.shallow(d, {});
     transport
@@ -120,6 +127,7 @@ exports.log_raw = log_raw;
 exports.put = put;
 exports.list = list;
 exports.bands = bands;
+exports.remove = remove;
 exports.updated = updated;
 exports.get = get;
 exports.all = all;

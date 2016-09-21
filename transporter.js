@@ -102,7 +102,7 @@ const make = () => {
 
         return Rx.Observable.create(observer => self.rx.bands(observer, d));
     };
-    self.delete = d => {
+    self.remove = d => {
         assert.ok(_.is.Dictionary(d), "d must be a Dictionary");
         assert.ok(_.is.String(d.id), "d.id must be a String");
 
@@ -110,7 +110,7 @@ const make = () => {
         delete d.band;
         delete d.value;
 
-        return Rx.Observable.create(observer => self.rx.delete(observer, d));
+        return Rx.Observable.create(observer => self.rx.remove(observer, d));
     };
 
     // use - this allows one transport to be the data source for another
@@ -187,7 +187,7 @@ const make = () => {
             source_transport
                 .all({})
                 .subscribe(
-                    bandd => _put_bandd,
+                    _put_bandd,
                     error => console.log("#", "HERE:MONITOR.ALL", error)
                 );
         }
@@ -231,6 +231,51 @@ const make = () => {
         }
     };
 
+    // copy everything from source to this. Promise resolves when done
+    self.copy = source_transport => new Promise((resolve, reject) => {
+        const counter = _.counter(error => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve();
+            }
+        });
+
+        counter.increment();
+
+        source_transport
+            .all({})
+            .subscribe(
+                bandd => {
+                    _.mapObject(bandd, ( value, band ) => {
+                        if (!_.is.Dictionary(value)) {
+                            return;
+                        }
+
+                        counter.increment();
+
+                        self.put({
+                            id: bandd.id,
+                            band: band,
+                            value: value
+                        }).subscribe(
+                            pd => {},
+                            error => {},
+                            () => {
+                                counter.decrement();
+                            }
+                        );
+                    });
+                },
+                error => {
+                    counter.decrement(error);
+                },
+                () => {
+                    counter.decrement();
+                }
+            );
+    });
+
     // reactive interface - used by subclasses
     self.rx.list = (observer, d) => observer.onError(new errors.ShouldBeImplementedInSubclass());
     self.rx.added = (observer, d) => observer.onError(new errors.ShouldBeImplementedInSubclass());
@@ -238,7 +283,7 @@ const make = () => {
     self.rx.put = (observer, d) => observer.onError(new errors.ShouldBeImplementedInSubclass());
     self.rx.get = (observer, d) => observer.onError(new errors.ShouldBeImplementedInSubclass());
     self.rx.bands = (observer, d) => observer.onError(new errors.ShouldBeImplementedInSubclass());
-    self.rx.delete = (observer, d) => observer.onError(new errors.ShouldBeImplementedInSubclass());
+    self.rx.remove = (observer, d) => observer.onError(new errors.ShouldBeImplementedInSubclass());
 
     // helpers
     self.all = d => self.list(d)
