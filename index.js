@@ -25,6 +25,9 @@
 const transporter = require('./transporter');
 exports.make = transporter.make;
 
+const create = require('./create');
+exports.create = create.create;
+
 const helpers = require('./helpers');
 exports.channel = helpers.channel;
 exports.unchannel = helpers.unchannel;
