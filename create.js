@@ -36,12 +36,13 @@ const logger = iotdb.logger({
 
 const defaultds = [
     {
-        "_tag": "core",
-        "_transporter": "iotdb-transport-iotdb",
+        "tag": "core",
+        "transporter": "iotdb-transport-iotdb",
+        "initd": {},
     },
     {
-        "_tag": "metadata",
-        "_transporter": "iotdb-transport-fs",
+        "tag": "persist",
+        "transporter": "iotdb-transport-fs",
         "initd": {
             "prefix": ".iotdb/things",
         },
@@ -50,32 +51,37 @@ const defaultds = [
     }
 ];
 
-const create = d => {
-    let td;
-
+const find = d => {
     if (_.is.String(d)) {
-        td = iotdb.settings().get("transporters", []).concat(defaultds).find(td => td._tag === d);
-        assert.ok(_.is.Dictionary(td), `should have found transporter '${ d }'`);
+        return iotdb.settings().get("transporters", []).concat(defaultds).find(td => td.tag === d);
     } else {
         assert.ok(_.is.Dictionary(d));
-        td = d;
+        return d;
+    }
+}
+
+const create = d => {
+    const td = find(d);
+    if (!td) {
+        throw new errors.NotFound(`did not find transporter '${ d }'`);
     }
 
-    assert.ok(_.is.String(td._transporter), "expected to see '_transporter'");
+    assert.ok(_.is.String(td.transporter), "expected to see 'transporter'");
 
-    const module = require(td._transporter);
-    const maker = td._make || "make";
-    const make = module[maker];
-    const connecter = td._connect || "connect";
-    const connect = module[connecter] || null;
+    const module = require(td.transporter);
+    const make_name = td.make || "make";
+    const make = module[make_name];
+    const connect_name = td.connect || "connect";
+    const connect = module[connect_name] || null;
 
-    assert.ok(_.is.Function(make), `should have found function '${ maker }'`);
-    assert.ok(_.is.Function(connect) || _.is.Null(connect), `should have found function '${ connecter }' or nothing`);
+    assert.ok(_.is.Function(make), `should have found function '${ make_name }'`);
+    assert.ok(_.is.Function(connect) || _.is.Null(connect), `should have found function '${ connect_name }' or nothing`);
 
-    const initd = _.d.transform(td, { key: key => !key.match(/^_/) ? key : null });
-
-    return make(initd, connect ? connect(initd) : null);
+    return make(td.initd, connect ? connect(td.initd, _.noop) : null);
 };
 
-// create("core")
-// create("metadata")
+/*
+ *  API
+ */
+exports.create = create;
+exports.find = find;

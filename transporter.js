@@ -41,6 +41,7 @@ const make = () => {
         rx: {},
         source: {},
         name: "iotdb-transport",
+        _isTransport: true,
     };
 
     // primary intereface
