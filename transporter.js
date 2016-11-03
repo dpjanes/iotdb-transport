@@ -114,6 +114,8 @@ const make = () => {
         return Rx.Observable.create(observer => self.rx.remove(observer, d));
     };
 
+    /*
+     *  To be deleted. Always use the transporter as an argument in this case
     // use - this allows one transport to be the data source for another
     self.use = (source_transport, d) => {
         d = _.d.compose.shallow(d, {});
@@ -124,6 +126,7 @@ const make = () => {
                 self.rx[key] = source_transport.rx[key];
             })
     };
+     */
 
     // monitor - this takes all data from the source and puts it into destination (self)
     self.monitor = (source_transport, _d) => {
