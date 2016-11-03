@@ -35,10 +35,10 @@ const _isObservable = o => o.subscribe != null;
 
 describe("base_binding", function() {
     describe("binding interface", function() {
-        describe("use", function() {
+        describe("copy", function() {
             it('exists', function(done) {
                 const t = transporter.make();
-                assert(_.is.Function(t.use));
+                assert(_.is.Function(t.copy));
                 done();
             });
         });
